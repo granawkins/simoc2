@@ -1,0 +1,1 @@
+name = 'simoc_lite'
