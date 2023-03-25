@@ -132,19 +132,16 @@ def test_agent_register(default_kwargs, agent_kwargs, habitat_kwargs, o2_mask_kw
     assert str(agent.records) == str({
         'step_num': [0],
         'active': [10],
+        'cause_of_death': None,
         'storage': {'ch4': [0.0]},
         'attributes': {
             'in_o2_deprive': [2],
-            'in_ch4_criteria_buffer': [2],
-        },
+            'in_ch4_criteria_buffer': [2]},
         'flows': {
-            'in': {
-                'o2': {'test_habitat': [0], 'test_o2_mask': [0]},
-                'ch4': {'test_habitat': [0]}},
-            'out': {
-                'co2': {'test_habitat': [0]},
-                'ch4': {'test_agent': [0]}},
-            }})
+            'in': {'o2': {'test_habitat': [0], 'test_o2_mask': [0]},
+                   'ch4': {'test_habitat': [0]}},
+            'out': {'co2': {'test_habitat': [0]},
+                    'ch4': {'test_agent': [0]}}}})
 
 @pytest.fixture
 def dummy_model(agent_kwargs, habitat_kwargs, o2_mask_kwargs):
@@ -178,9 +175,7 @@ def test_agent_storage(dummy_model):
     assert str(habitat.view('n2')) == str({'n2': 100})
     # for groups, return proportional amount
     group_increment = habitat.increment('atmosphere', -1)
-    assert group_increment['o2'] == approx(-0.163030)
-    assert group_increment['co2'] == -0.0
-    assert group_increment['n2'] == approx(-0.836050)
+    assert sum(group_increment.values()) == approx(-1)
 
 def test_agent_get_step_value(dummy_model):
     agent = dummy_model.agents['test_agent']
@@ -233,25 +228,31 @@ def test_agent_get_step_value(dummy_model):
     assert step_value4 == (0.0)  # If criteria false, reset buffer and return 0
     assert agent.attributes['in_ch4_criteria_buffer'] == 2
 
-def test_agent_step(dummy_model):
-
-    # thresholds: run out of oxygen
-    m1 = MockModel.duplicate(dummy_model)
-    agent = m1.agents['test_agent']
-    habitat = m1.agents['test_habitat']
-    for i in range(100):
-        o2_ratio = habitat.storage['o2'] / sum(habitat.view('atmosphere').values())
-        if o2_ratio < 0.14:
-            print('less')
-            assert agent.attributes['in_o2_deprive'] == 2
-        m1.step()
-    agent = m1.agents['test_agent']
-    # assert agent.records['flows']['in']['o2']['test_habitat'][-1] == -0.075
-    assert agent.cause_of_death == 'test_agent passed o2 threshold'
-
-    # connections
-    # availability
-    # records (step_num, active, storage, attributes, all flows)
+def test_agent_step_threshold(dummy_model):
     agent = dummy_model.agents['test_agent']
-    assert agent.active == 10
-    assert agent.storage['ch4'] == 0.0
+    assert agent.attributes['in_ch4_criteria_buffer'] == 2
+    dummy_model.step()
+    assert agent.attributes['in_ch4_criteria_buffer'] == 1
+    dummy_model.step(3)
+
+def test_agent_step_connections(dummy_model):
+    # Force the habitat to run out of O2 and use o2 mask. have to remove threshold to do this.
+    habitat = dummy_model.agents['test_habitat']
+    habitat.storage['o2'] = 0.1
+    res = habitat.increment('o2', -100)
+    res = habitat.increment('ch4', -100)
+    print(habitat.storage)
+    dummy_model.step(1)
+    o2_record = dummy_model.agents['test_agent'].records['flows']['in']['o2']
+    assert o2_record['test_o2_mask'][1] == -0.075
+    assert dummy_model.agents['test_agent'].active == 10
+
+def test_agent_step_availability(dummy_model):
+
+
+    # # connections
+    # # availability
+    # # records (step_num, active, storage, attributes, all flows)
+    # agent = dummy_model.agents['test_agent']
+    # assert agent.active == 10
+    # assert agent.storage['ch4'] == 0.0

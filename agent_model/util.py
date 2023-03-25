@@ -1,5 +1,6 @@
 import json, copy, operator
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 def load_data_file(fname, data_dir=None):
     """Load data file from data directory."""
@@ -40,9 +41,12 @@ def evaluate_reference(agent, reference):
     if path.startswith('in_') or path.startswith('out_'):
         elements = path.split('_')
         direction, currency = elements[0], elements[1]
-        conn = agent.flows[direction][currency]['connections'][0]
-        ref_agent = agent.model.agents[conn]
-        path = '_'.join(elements[1:])
+        for conn in agent.flows[direction][currency]['connections']:
+            ref_agent = agent.model.agents[conn]
+            updated_reference = {**reference, 'path': '_'.join(elements[1:])}
+            if evaluate_reference(ref_agent, updated_reference):
+                return True
+        return False
     # Parse field
     if path in ref_agent.attributes:
         target = ref_agent.attributes[path]
@@ -63,3 +67,78 @@ def get_default_agent_data(agent):
         return copy.deepcopy(default_agent_desc[agent])
     return None
 
+def parse_data(data, path):
+    """Recursive function to extract data at path from arbitrary object"""
+    if not data and data != 0:
+        return None
+    elif len(path) == 0:
+        return 0 if data is None else data
+    # Shift the first element of path, past on the rest of the path
+    index, *remainder = path
+    # LISTS
+    if isinstance(data, list):
+        # All Items
+        if index == '*':
+            parsed = [parse_data(d, remainder) for d in data]
+            return [d for d in parsed if d is not None]
+        # Single index
+        elif isinstance(index, int):
+            return parse_data(data[index], remainder)
+        # Range i:j (string)
+        else:
+            start, end = [int(i) for i in index.split(':')]
+            return [parse_data(d, remainder) for d in data[start:end]]
+    # DICTS
+    elif isinstance(data, dict):
+        # All items, either a dict ('*') or a number ('SUM')
+        if index in {'*', 'SUM'}:
+            parsed = [parse_data(d, remainder) for d in data.values()]
+            output = {k: v for k, v in zip(data.keys(), parsed) if v or v == 0}
+            if len(output) == 0:
+                return None
+            elif index == '*':
+                return output
+            else:
+                if isinstance(next(iter(output.values())), list):
+                    return [sum(x) for x in zip(*output.values())]
+                else:
+                    return sum(output.values())
+        # Single Key
+        elif index in data:
+            return parse_data(data[index], remainder)
+        # Comma-separated list of keys. Return an object with all.
+        elif isinstance(index, str):
+            indices = [i.strip() for i in index.split(',') if i in data]
+            parsed = [parse_data(data[i], remainder) for i in indices]
+            output = {k: v for k, v in zip(indices, parsed) if v or v == 0}
+            return output if len(output) > 0 else None
+
+def plot_agent(data, agent, category, exclude=[], include=[], i=None, j=None, ax=None):
+    """Helper function for plotting model data
+
+    Plotting function which takes model-exported data, agent name,
+    one of (flows, growth, storage, deprive), exclude, and i:j
+    """
+    i = i if i is not None else 0
+    j = j if j is not None else data['step_num']
+    ax = ax if ax is not None else plt
+    if category == 'flows':
+        path = [agent, 'flows', '*', '*', 'SUM', f'{i}:{j}']
+        flows = parse_data(data, path)
+        for direction in ('in', 'out'):
+            if direction not in flows:
+                continue
+            for currency, values in flows[direction].items():
+                label = f'{direction}_{currency}'
+                if currency in exclude or label in exclude:
+                    continue
+                ax.plot(range(i, j), values, label=label)
+    elif category in {'storage', 'attributes'}:
+        path = [agent, category, '*', f'{i}:{j}']
+        parsed = parse_data(data, path)
+        for field, values in parsed.items():
+            if field in exclude or (include and field not in include):
+                continue
+            ax.plot(range(i, j), values, label=field)
+    ax.legend()
+    return ax

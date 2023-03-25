@@ -19,6 +19,7 @@ class Agent:
         self.thresholds = {} if thresholds is None else _copy(thresholds)      # Env. conditions to die
         self.flows = {'in': {}, 'out': {}} if flows is None else _copy(flows)  # Exchanges w/ other agents
         # -- DYNAMIC
+        self.cause_of_death = None
         self.active = amount if active is None else _copy(active)              # Current number alive
         self.storage = {} if storage is None else _copy(storage)               # Currencies stored
         self.attributes = {} if attributes is None else _copy(attributes)      # Dynamic vars, 'te_factor'
@@ -41,6 +42,7 @@ class Agent:
         self.records = {
             'step_num': [self.model.step_num],
             'active': [self.active],
+            'cause_of_death': self.cause_of_death,
             'storage': {currency: [self.storage[currency]] for currency in self.storage},
             'attributes': {attr: [self.attributes[attr]] for attr in self.attributes},
             'flows': flow_records,
@@ -82,6 +84,8 @@ class Agent:
         if value < 0:  # Can be currency or currency_class
             available = self.view(currency)
             total_available = sum(available.values())
+            if total_available == 0:
+                return {currency: 0}
             actual = -min(-value, total_available)
             increment = {currency: actual * stored/total_available
                          for currency, stored in available.items()}
@@ -152,10 +156,12 @@ class Agent:
         # Execute flows
         influx = {}  # Which currencies were consumed, and what fraction of baseline
         for direction in {'in', 'out'}:
+            if direction not in self.flows:
+                continue
             for currency, flow in self.flows[direction].items():
 
                 # Calculate Target Value
-                if self.active:
+                if self.active and 'value' in flow:
                     target_value = self.get_step_value(dT, direction, currency, flow, influx)
                 else:
                     target_value = 0
@@ -197,6 +203,7 @@ class Agent:
             self.records['storage'][currency].append(self.storage[currency])
         for attribute in self.attributes:
             self.records['attributes'][attribute].append(self.attributes[attribute])
+        self.records['cause_of_death'] = self.cause_of_death
 
     def kill(self, reason, n_dead=None):
         """Kill n_dead agents, or all if n_dead is None. Overloadable by subclasses."""
