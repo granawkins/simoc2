@@ -1,6 +1,9 @@
-import json, copy, operator
+import json, copy, operator, math
 from pathlib import Path
+import numpy as np
 import matplotlib.pyplot as plt
+
+# DATA HANDLING
 
 def load_data_file(fname, data_dir=None):
     """Load data file from data directory."""
@@ -15,6 +18,12 @@ def load_data_file(fname, data_dir=None):
         data = json.load(f)
     return data
 
+def get_default_agent_data(agent):
+    """Return the relevant dict from default agent_desc.json"""
+    default_agent_desc = load_data_file('agent_desc.json')
+    if agent in default_agent_desc:
+        return copy.deepcopy(default_agent_desc[agent])
+    return None
 
 def merge_json(default, to_merge):
     """Merge two objects of arbitrary depth/elements"""
@@ -26,6 +35,8 @@ def merge_json(default, to_merge):
         return list(set(default).union(set(to_merge)))
     elif isinstance(to_merge, (str, int, float, bool)):
         return to_merge
+
+# LIMIT FUNCTIONS (THRESHOLD AND CRITERIA)
 
 operator_dict = {'>': operator.gt, '<': operator.lt, '=': operator.eq}
 def evaluate_reference(agent, reference):
@@ -39,14 +50,16 @@ def evaluate_reference(agent, reference):
     ref_agent = agent
     # Parse connected agent
     if path.startswith('in_') or path.startswith('out_'):
+        # Evaluate connections by direction/currency
         elements = path.split('_')
         direction, currency = elements[0], elements[1]
-        for conn in agent.flows[direction][currency]['connections']:
-            ref_agent = agent.model.agents[conn]
-            updated_reference = {**reference, 'path': '_'.join(elements[1:])}
-            if evaluate_reference(ref_agent, updated_reference):
-                return True
-        return False
+        conns = agent.flows[direction][currency]['connections']
+        updated_reference = {**reference, 'path': '_'.join(elements[1:])}
+        results = (evaluate_reference(agent.model.agents[c], updated_reference) for c in conns)
+        # Return group eval connections
+        if 'connections' in reference and reference['connections'] == 'all':
+            return all(results)
+        return any(results)
     # Parse field
     if path in ref_agent.attributes:
         target = ref_agent.attributes[path]
@@ -58,14 +71,57 @@ def evaluate_reference(agent, reference):
         total = sum(ref_agent.view(currency_data['class']).values())
         target = 0 if not total else ref_agent.storage[currency] / total
     # Evaluate
-    return operator_dict[limit](target, value)
+    return operator_dict[limit](
+        round(target, agent.model.floating_point_accuracy),
+        round(value, agent.model.floating_point_accuracy))
 
-def get_default_agent_data(agent):
-    """Return the relevant dict from default agent_desc.json"""
-    default_agent_desc = load_data_file('agent_desc.json')
-    if agent in default_agent_desc:
-        return copy.deepcopy(default_agent_desc[agent])
-    return None
+# GROWTH FUNCTIONS
+
+def pdf(_x, std, cache={}):
+    """return Gaussian Probability Distribution"""
+    if (_x, std) not in cache:
+        numerator = math.exp(-1 * (_x ** 2) / (2 * (std ** 2)))
+        denominator = math.sqrt(2 * math.pi) * std
+        cache[(_x, std)] = numerator / denominator
+    return cache[(_x, std)]
+
+def sample_norm(rate, min_value=0, max_value=1, std=math.pi/10, center=0.5):
+    """return the normalized sigmoid value"""
+    x = (rate - center) / std
+    y = pdf(x, std)
+    norm_factor = pdf(0, std)
+    normalized = y / norm_factor
+    scaled = normalized * (max_value - min_value)
+    shifted = scaled + min_value
+    return shifted
+
+def sample_clipped_norm(rate, factor=2, **kwargs):
+    norm_value = sample_norm(rate, **kwargs)
+    norm_value *= factor
+    return min(max(norm_value, 0), factor)
+
+def sample_sigmoid(rate, min_value=0, max_value=1, steepness=1, center=0.5):
+    """return the sigmoid value"""
+    x = steepness * 20 * (rate - center)
+    y = 1 / (1 + np.exp(-x))
+    scaled = y * (max_value - min_value)
+    shifted = scaled + min_value
+    return shifted
+
+def evaluate_growth(agent, mode, params):
+    if mode == 'daily':
+        rate = agent.model.step_num % 24 / 24
+    elif mode == 'lifetime':
+        rate = agent.attributes['age'] / agent.properties['lifetime']['value']
+    growth_type = params.pop('type')
+    growth_func = {
+        'norm': sample_norm,
+        'sigmoid': sample_sigmoid,
+        'clipped': sample_clipped_norm,
+    }[growth_type]
+    return growth_func(rate, **params)
+
+# WORKING WITH OUTPUTS
 
 def parse_data(data, path):
     """Recursive function to extract data at path from arbitrary object"""

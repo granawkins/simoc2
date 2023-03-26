@@ -1,8 +1,6 @@
-import math, copy
-from .util import evaluate_reference
-
-def _copy(obj):
-    return copy.deepcopy(obj)
+import math
+from copy import deepcopy
+from .util import evaluate_reference, evaluate_growth
 
 class Agent:
     # ------------- SETUP  ------------- #
@@ -14,15 +12,15 @@ class Agent:
         self.amount = 1 if amount is None else amount                   # Starting/Maximum number alive
         self.description = '' if description is None else description   # Plaintext description
         self.agent_class = '' if agent_class is None else agent_class   # Agent class name
-        self.properties = {} if properties is None else _copy(properties)      # Static vars, 'volume'
-        self.capacity = {} if capacity is None else _copy(capacity)            # Max storage per currency
-        self.thresholds = {} if thresholds is None else _copy(thresholds)      # Env. conditions to die
-        self.flows = {'in': {}, 'out': {}} if flows is None else _copy(flows)  # Exchanges w/ other agents
+        self.properties = {} if properties is None else deepcopy(properties)      # Static vars, 'volume'
+        self.capacity = {} if capacity is None else deepcopy(capacity)            # Max storage per currency
+        self.thresholds = {} if thresholds is None else deepcopy(thresholds)      # Env. conditions to die
+        self.flows = {'in': {}, 'out': {}} if flows is None else deepcopy(flows)  # Exchanges w/ other agents
         # -- DYNAMIC
         self.cause_of_death = None
-        self.active = amount if active is None else _copy(active)              # Current number alive
-        self.storage = {} if storage is None else _copy(storage)               # Currencies stored
-        self.attributes = {} if attributes is None else _copy(attributes)      # Dynamic vars, 'te_factor'
+        self.active = amount if active is None else deepcopy(active)              # Current number alive
+        self.storage = {} if storage is None else deepcopy(storage)               # Currencies stored
+        self.attributes = {} if attributes is None else deepcopy(attributes)      # Dynamic vars, 'te_factor'
         # -- NON-SERIALIZED
         self.registered = False                                         # Agent has been registered
         self.records = {}                                               # Container for step records
@@ -59,6 +57,10 @@ class Agent:
             deprive_attr = f'{direction}_{currency}_deprive'
             if deprive_attr not in self.attributes:
                 self.attributes[deprive_attr] = flow['deprive']['value']
+        if 'growth' in flow:
+            for mode, params in flow['growth'].items():
+                growth_attr = f'{direction}_{currency}_{mode}_growth_factor'
+                self.attributes[growth_attr] = 0
         for agent in flow['connections']:
             if agent not in self.model.agents:
                 raise ValueError(f'Agent {agent} not registered')
@@ -87,7 +89,7 @@ class Agent:
             if total_available == 0:
                 return {currency: 0}
             actual = -min(-value, total_available)
-            increment = {currency: actual * stored/total_available
+            increment = {currency: round(actual * stored/total_available, self.model.floating_point_accuracy)
                          for currency, stored in available.items()}
             for currency, amount in increment.items():
                 self.storage[currency] += amount
@@ -96,9 +98,9 @@ class Agent:
             if self.model.currency_dict[currency]['currency_type'] != 'currency':
                 raise ValueError(f'Cannot increment currency by class ({currency})')
             if currency not in self.storage:
-                return {currency: 0}
+                self.storage[currency] = 0
             remaining_capacity = self.capacity[currency] - self.storage[currency]
-            actual = min(value, remaining_capacity)
+            actual = round(min(value, remaining_capacity), self.model.floating_point_accuracy)
             self.storage[currency] += actual
             return {currency: actual}
 
@@ -125,6 +127,14 @@ class Agent:
                 if 'buffer' in criteria and self.attributes[buffer_attr] == 0:
                     self.attributes[buffer_attr] = criteria['buffer']
                 step_value = 0
+        growth = flow.get('growth')
+        if step_value > 0 and growth:
+            for mode, params in growth.items():
+                growth_attr = f'{direction}_{currency}_{mode}_growth_factor'
+                growth_factor = evaluate_growth(self, mode, params)
+                self.attributes[growth_attr] = growth_factor
+                step_value *= growth_factor
+
         weighted = flow.get('weighted')
         if step_value > 0 and weighted:
             for field in weighted:
@@ -155,19 +165,19 @@ class Agent:
 
         # Execute flows
         influx = {}  # Which currencies were consumed, and what fraction of baseline
-        for direction in {'in', 'out'}:
+        for direction in ['in', 'out']:
             if direction not in self.flows:
                 continue
             for currency, flow in self.flows[direction].items():
 
                 # Calculate Target Value
                 if self.active and 'value' in flow:
-                    target_value = self.get_step_value(dT, direction, currency, flow, influx)
+                    target_value = self.active * self.get_step_value(dT, direction, currency, flow, influx)
                 else:
                     target_value = 0
 
                 # Process Flow
-                remaining = target_value * self.active
+                remaining = float(target_value)
                 for connection in flow['connections']:
                     if remaining > 0:
                         agent = self.model.agents[connection]
@@ -188,7 +198,8 @@ class Agent:
                 if 'deprive' in flow:
                     deprive_attr = f'{direction}_{currency}_deprive'
                     if available_ratio < 1:
-                        remaining = self.attributes[deprive_attr] - available_ratio
+                        deprived_ratio = 1 - available_ratio
+                        remaining = self.attributes[deprive_attr] - deprived_ratio
                         self.attributes[deprive_attr] = max(0, remaining)
                         if remaining < 0:
                             n_dead = math.ceil(-remaining * self.active)
@@ -215,16 +226,16 @@ class Agent:
     # ------------- INSPECT ------------- #
     def get_records(self, static_fields=False, clear_cache=False):
         """Return records dict and optionally clear cache"""
-        output = copy.deepcopy(self.records)
+        output = deepcopy(self.records)
         if static_fields:
             output['agent_id'] = self.agent_id
             output['amount'] = self.amount
             output['description'] = self.description
             output['agent_class'] = self.agent_class
-            output['properties'] = copy.deepcopy(self.properties)
-            output['capacity'] = copy.deepcopy(self.capacity)
-            output['thresholds'] = copy.deepcopy(self.thresholds)
-            output['flows'] = copy.deepcopy(self.flows)
+            output['properties'] = deepcopy(self.properties)
+            output['capacity'] = deepcopy(self.capacity)
+            output['thresholds'] = deepcopy(self.thresholds)
+            output['flows'] = deepcopy(self.flows)
         if clear_cache:
             def recursively_clear_lists(r):
                 if isinstance(r, dict):

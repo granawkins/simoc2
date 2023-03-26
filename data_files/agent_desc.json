@@ -115,12 +115,14 @@
             "o2": {
                 "path": "in_o2_ratio",
                 "limit": "<",
-                "value": 0.08
+                "value": 0.08,
+                "connections": "all"
             },
             "co2": {
                 "path": "in_co2_ratio",
                 "limit": ">",
-                "value": 0.01
+                "value": 0.01,
+                "connections": "all"
             }
         },
         "attributes": {},

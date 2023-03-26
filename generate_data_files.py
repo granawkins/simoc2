@@ -50,6 +50,7 @@ def update_desc(agent_type, desc):
                 'path': f'in_{currency}_ratio',
                 'limit': '>' if limit == 'upper' else '<',
                 'value': char['value'],
+                'connections': 'all',  # Require every connection to evaluate true
             }
         else:
             new_desc['properties'][char_type] = {k: v for k, v in char.items() if k != 'type'}

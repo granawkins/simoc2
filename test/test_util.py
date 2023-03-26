@@ -2,8 +2,8 @@ import pytest
 
 from ..agent_model.Agent import Agent
 from ..agent_model.Model import Model
-from ..agent_model.util import (load_data_file, merge_json, evaluate_reference,
-                    get_default_agent_data)
+from ..agent_model.util import (load_data_file, merge_json, get_default_agent_data,
+                                evaluate_reference, evaluate_growth)
 
 def test_load_data_files():
     agent_desc = load_data_file('agent_desc.json')
@@ -30,6 +30,8 @@ class MockAgent:
         return self.storage
 class MockModel:
     def __init__(self):
+        self.step_num = 0
+        self.floating_point_accuracy = 6
         self.currency_dict = Model.build_currency_dict()
         self.agents = {
             'a': MockAgent(self, 'b'),
@@ -44,3 +46,10 @@ def test_evaluate_reference():
     assert evaluate_reference(agent, reference)
     reference = {'path': 'in_co2_ratio', 'limit': '>', 'value': 0.03}
     assert not evaluate_reference(agent, reference)
+
+def test_evaluate_growth():
+    model = MockModel()
+    agent = model.agents['a']
+    assert evaluate_growth(agent, 'daily', {'type': 'clipped'}) > 0
+
+

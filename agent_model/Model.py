@@ -3,7 +3,9 @@ from .util import load_data_file, get_default_agent_data, merge_json
 from .Agent import Agent
 
 DEFAULT_START_TIME = '1991-01-01 00:00:00'
+FLOATING_POINT_ACCURACY = 6
 class Model:
+    floating_point_accuracy = FLOATING_POINT_ACCURACY
     step_num = 0
     def __init__(self, agents, termination=None, location=None, minutes_per_step=None,
                  priorities=None, start_time=None, currency_desc=None):

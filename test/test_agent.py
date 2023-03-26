@@ -8,6 +8,7 @@ from ..agent_model.util import load_data_file
 
 class MockModel:
     def __init__(self):
+        self.floating_point_accuracy = 6
         self.step_num = 0
         self.currency_dict = Model.build_currency_dict()
         self.agents = {}
@@ -20,16 +21,6 @@ class MockModel:
         for _ in range(n_steps):
             for agent in self.agents.values():
                 agent.step()
-
-    @classmethod
-    def duplicate(cls, model):
-        """Create a new agent of the same class with the same properties"""
-        new_model = cls()
-        for name, agent in model.agents.items():
-            kwargs = agent.export()
-            kwargs['model'] = new_model
-            new_model.agents[name] = Agent(**kwargs)
-        return new_model
 
 @pytest.fixture
 def default_kwargs():
@@ -54,14 +45,13 @@ def agent_kwargs():
         agent_class='test',
         properties={'activity_level': {'value': 0.5}, 'mass_ratio': {'value': 0.5, 'unit': 'kg'}},
         capacity={'ch4': .01},
-        thresholds={'o2': {'path': 'in_o2_ratio', 'limit': '<', 'value': .14},
+        thresholds={'o2': {'path': 'in_o2_ratio', 'limit': '<', 'value': .14, 'connections': 'all'},
                     'ch4': {'path': 'ch4', 'limit': '>', 'value': .009}},
         flows={'in': {
             'o2': {
                 'value': .03,
                 'flow_rate': {'unit': 'kg', 'time': 'hour'},
                 'deprive': {'value': 2, 'unit': 'hour'},
-                'growth': {'lifetime': {'type': 'norm'}},
                 'weighted': ['activity_level', 'mass_ratio'],
                 'connections': ['test_habitat', 'test_o2_mask'],
             },
@@ -93,7 +83,7 @@ def agent_kwargs():
 def habitat_kwargs():
     return dict(
         capacity={'n2': 100, 'o2': 100, 'co2': 100, 'ch4': 100},
-        storage={'n2': 80, 'o2': 19.5, 'co2': 0.41, 'ch4': 0.11},
+        storage={'n2': 80, 'o2': 19.5, 'co2': 0.38, 'ch4': 0.12},
     )
 
 @pytest.fixture
@@ -160,15 +150,15 @@ def test_agent_storage(dummy_model):
     agent = dummy_model.agents['test_agent']
     habitat = dummy_model.agents['test_habitat']
     assert str(agent.view('co2')) == str({'co2': 0})
-    assert str(habitat.view('co2')) == str({'co2': 0.41})
-    assert str(habitat.view('atmosphere')) == str({'o2': 19.5, 'co2': 0.41, 'n2': 80, 'ch4': 0.11})
+    assert str(habitat.view('co2')) == str({'co2': 0.38})
+    assert str(habitat.view('atmosphere')) == str({'o2': 19.5, 'co2': 0.38, 'n2': 80, 'ch4': 0.12})
     assert str(habitat.view('food')) == str({})
 
     # increment
     assert str(habitat.increment('co2', -.001)) == str({'co2': -0.001})
-    assert str(habitat.view('co2')) == str({'co2': 0.409})
+    assert str(habitat.view('co2')) == str({'co2': 0.379})
     # if not enough in storage, do as much as is available
-    assert str(habitat.increment('co2', -10)) == str({'co2': -0.409})
+    assert str(habitat.increment('co2', -10)) == str({'co2': -0.379})
     assert str(habitat.view('co2')) == str({'co2': 0.0})
     # if over-capacity, take as much as possible
     assert str(habitat.increment('n2', 30)) == str({'n2': 20})
@@ -228,31 +218,55 @@ def test_agent_get_step_value(dummy_model):
     assert step_value4 == (0.0)  # If criteria false, reset buffer and return 0
     assert agent.attributes['in_ch4_criteria_buffer'] == 2
 
+def test_agent_step_requires(dummy_model):
+    agent = Agent('test_agent', dummy_model, flows={
+            'in': {'n2': {'value': .001, 'connections': ['test_habitat'], 'requires': ['o2']},
+                   'o2': {'value': .001, 'connections': ['test_habitat']},
+                   'ch4': {'value': .001, 'connections': ['test_habitat'], 'requires': ['o2']}},
+            'out': {}})
+    dummy_model.agents['test_agent'] = agent
+    dummy_model.step(2)
+    dummy_model.agents['test_habitat'].storage['o2'] = 0.0005
+    dummy_model.step(2)
+    assert agent.records['flows']['in']['n2']['test_habitat'] == [0, 0, 0, 0, 0]  # before  step, no flow
+    assert agent.records['flows']['in']['ch4']['test_habitat'] == [0, -0.001, -0.001, -0.0005, 0]  # dependent and weighted
+
 def test_agent_step_threshold(dummy_model):
     agent = dummy_model.agents['test_agent']
     assert agent.attributes['in_ch4_criteria_buffer'] == 2
+    assert agent.storage['ch4'] == 0
     dummy_model.step()
     assert agent.attributes['in_ch4_criteria_buffer'] == 1
-    dummy_model.step(3)
+    dummy_model.step()
+    assert agent.attributes['in_ch4_criteria_buffer'] == 0
+    assert agent.storage['ch4'] == 0
+    dummy_model.step()
+    assert agent.storage['ch4'] == 0.01
+    dummy_model.step()
+    assert agent.active == 0
+    assert agent.cause_of_death == 'test_agent passed ch4 threshold'
 
 def test_agent_step_connections(dummy_model):
     # Force the habitat to run out of O2 and use o2 mask. have to remove threshold to do this.
     habitat = dummy_model.agents['test_habitat']
-    habitat.storage['o2'] = 0.1
-    res = habitat.increment('o2', -100)
-    res = habitat.increment('ch4', -100)
-    print(habitat.storage)
+    habitat.storage['ch4'] = 0  # Don't kill agent
+    habitat.storage['o2'] = 0   # Force agent to use secondary ocnnection for o2
     dummy_model.step(1)
     o2_record = dummy_model.agents['test_agent'].records['flows']['in']['o2']
     assert o2_record['test_o2_mask'][1] == -0.075
     assert dummy_model.agents['test_agent'].active == 10
 
-def test_agent_step_availability(dummy_model):
+def test_agent_step_deprive(dummy_model):
+    dummy_model.agents['test_habitat'].storage['o2'] = 0
+    dummy_model.agents['test_o2_mask'].storage['o2'] = 0
+    agent = dummy_model.agents['test_agent']
+    del agent.thresholds['o2']
+    assert agent.attributes['in_o2_deprive'] == 2
+    dummy_model.step()
+    assert agent.attributes['in_o2_deprive'] == 1
+    dummy_model.step()
+    assert agent.attributes['in_o2_deprive'] == 0
+    assert agent.cause_of_death is None
+    dummy_model.step()
+    assert agent.cause_of_death == 'test_agent deprived of o2'
 
-
-    # # connections
-    # # availability
-    # # records (step_num, active, storage, attributes, all flows)
-    # agent = dummy_model.agents['test_agent']
-    # assert agent.active == 10
-    # assert agent.storage['ch4'] == 0.0
