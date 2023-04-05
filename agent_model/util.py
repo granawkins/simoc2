@@ -25,6 +25,19 @@ def get_default_agent_data(agent):
         return copy.deepcopy(default_agent_desc[agent])
     return None
 
+def get_default_currency_data():    
+    """Load default currency_desc.json and convert to new structure"""
+    currencies = {}
+    currency_desc = load_data_file('currency_desc.json')
+    for currency_class, class_currencies in currency_desc.items():
+        for currency, currency_data in class_currencies.items():
+            currencies[currency] = currency_data
+            currencies[currency]['currency_type'] = 'currency'
+            currencies[currency]['class'] = currency_class
+        currencies[currency_class] = {'currency_type': 'class',
+                                     'currencies': list(class_currencies.keys())}
+    return currencies
+
 def merge_json(default, to_merge):
     """Merge two objects of arbitrary depth/elements"""
     if isinstance(to_merge, dict):
@@ -35,6 +48,14 @@ def merge_json(default, to_merge):
         return list(set(default).union(set(to_merge)))
     elif isinstance(to_merge, (str, int, float, bool)):
         return to_merge
+
+def recursively_clear_lists(r):
+    if isinstance(r, (int, float, str)):
+        return r
+    elif isinstance(r, dict):
+        return {k: recursively_clear_lists(v) for k, v in r.items()}
+    elif isinstance(r, list):
+        return []
 
 # LIMIT FUNCTIONS (THRESHOLD AND CRITERIA)
 
@@ -110,7 +131,7 @@ def sample_sigmoid(rate, min_value=0, max_value=1, steepness=1, center=0.5):
 
 def evaluate_growth(agent, mode, params):
     if mode == 'daily':
-        rate = agent.model.step_num % 24 / 24
+        rate = agent.model.time.hour / 24
     elif mode == 'lifetime':
         rate = agent.attributes['age'] / agent.properties['lifetime']['value']
     growth_type = params.pop('type')

@@ -1,48 +1,81 @@
 import math
 from copy import deepcopy
-from .util import evaluate_reference, evaluate_growth
+from .util import evaluate_reference, evaluate_growth, recursively_clear_lists
 
 class Agent:
     # ------------- SETUP  ------------- #
-    def __init__(self, agent_id, model, amount=1, description=None, agent_class=None,
-                 properties=None, capacity=None, thresholds=None, flows=None,
-                 active=None, storage=None, attributes=None):
+    def __init__(self, model, agent_id, amount=1, description=None, 
+                 agent_class=None, properties=None, capacity=None, 
+                 thresholds=None, flows=None, cause_of_death=None, active=None, 
+                 storage=None, attributes=None):
+        """Create an agent with the given parameters.
+        
+        Args:
+            model (AgentModel): AgentModel instance
+            agent_id (str): A unique string
+            amount (int): Starting/Maximum number alive
+            description (str): Plaintext description
+            agent_class (str): Agent class name
+            properties (dict): Static vars, 'volume'
+            capacity (dict): Max storage per currency
+            thresholds (dict): Env. conditions to die
+            flows (dict): Exchanges w/ other agents
+            cause_of_death (str): Reason for death
+            active (int): Current number alive
+            storage (dict): Currencies stored
+            attributes (dict): Dynamic vars, 'te_factor'
+        """
         # -- STATIC
-        self.agent_id = agent_id                                        # A unique string
-        self.amount = 1 if amount is None else amount                   # Starting/Maximum number alive
-        self.description = '' if description is None else description   # Plaintext description
-        self.agent_class = '' if agent_class is None else agent_class   # Agent class name
-        self.properties = {} if properties is None else deepcopy(properties)      # Static vars, 'volume'
-        self.capacity = {} if capacity is None else deepcopy(capacity)            # Max storage per currency
-        self.thresholds = {} if thresholds is None else deepcopy(thresholds)      # Env. conditions to die
-        self.flows = {'in': {}, 'out': {}} if flows is None else deepcopy(flows)  # Exchanges w/ other agents
+        self.agent_id = agent_id
+        self.amount = 1 if amount is None else amount 
+        self.description = '' if description is None else description 
+        self.agent_class = '' if agent_class is None else agent_class 
+        self.properties = {} if properties is None else deepcopy(properties)
+        self.capacity = {} if capacity is None else deepcopy(capacity)
+        self.thresholds = {} if thresholds is None else deepcopy(thresholds)
+        self.flows = {'in': {}, 'out': {}}
+        for direction in ('in', 'out'):
+            if flows is not None and direction in flows:
+                self.flows[direction] = deepcopy(flows[direction])
         # -- DYNAMIC
-        self.cause_of_death = None
-        self.active = amount if active is None else deepcopy(active)              # Current number alive
-        self.storage = {} if storage is None else deepcopy(storage)               # Currencies stored
-        self.attributes = {} if attributes is None else deepcopy(attributes)      # Dynamic vars, 'te_factor'
+        self.cause_of_death = cause_of_death
+        self.active = amount if active is None else deepcopy(active)
+        self.storage = {} if storage is None else deepcopy(storage)
+        self.attributes = {} if attributes is None else deepcopy(attributes)
         # -- NON-SERIALIZED
-        self.registered = False                                         # Agent has been registered
-        self.records = {}                                               # Container for step records
-        self.model = model                                              # AgentModel instance
+        self.model = model
+        self.registered = False
+        self.records = {}
 
-    def register(self):
-        """Check and setup agent after all agents have been added to Model"""
+    def register(self, record_initial_state=False):
+        """Check and setup agent after all agents have been added to Model.
+        
+        Args:
+            record_initial_state (bool): Whether to include a value for 
+                'step 0'; True for new simulations, false when loading
+        """
         if self.registered:
             return
+        if 'age' not in self.attributes:
+            self.attributes['age'] = 0
         # Initialize flow attributes and records, check connections
         flow_records = {'in': {}, 'out': {}}
         for direction, flows in self.flows.items():
             for currency, flow in flows.items():
                 self.register_flow(direction, currency, flow)
-                flow_records[direction][currency] = {c: [0] for c in flow['connections']}
+                record = {c: [] if not record_initial_state else [0]
+                          for c in flow['connections']}
+                flow_records[direction][currency] = record
         # Initialize records skeleton
         self.records = {
-            'step_num': [self.model.step_num],
-            'active': [self.active],
+            'active': [] if not record_initial_state else [self.active],
             'cause_of_death': self.cause_of_death,
-            'storage': {currency: [self.storage[currency]] for currency in self.storage},
-            'attributes': {attr: [self.attributes[attr]] for attr in self.attributes},
+            'storage': {currency: [] if not record_initial_state 
+                        else [self.storage[currency]] 
+                        for currency in self.storage},
+            'attributes': {attr: [] if not record_initial_state 
+                           else [self.attributes[attr]] 
+                           for attr in self.attributes},
             'flows': flow_records,
         }
         self.registered = True
@@ -51,36 +84,63 @@ class Agent:
         """Check flow, setup attributes and records. Overloadable by subclasses."""
         if 'criteria' in flow and 'buffer' in flow['criteria']:
             buffer_attr = f'{direction}_{currency}_criteria_buffer'
-            if buffer_attr not in self.attributes:
-                self.attributes[buffer_attr] = flow['criteria']['buffer']
+            self.attributes[buffer_attr] = flow['criteria']['buffer']
         if 'deprive' in flow:
             deprive_attr = f'{direction}_{currency}_deprive'
-            if deprive_attr not in self.attributes:
-                self.attributes[deprive_attr] = flow['deprive']['value']
+            self.attributes[deprive_attr] = flow['deprive']['value']
         if 'growth' in flow:
             for mode, params in flow['growth'].items():
                 growth_attr = f'{direction}_{currency}_{mode}_growth_factor'
-                self.attributes[growth_attr] = 0
+                self.attributes[growth_attr] = evaluate_growth(self, mode, params)
         for agent in flow['connections']:
             if agent not in self.model.agents:
                 raise ValueError(f'Agent {agent} not registered')
             if currency not in self.model.agents[agent].capacity:
                 raise ValueError(f'Agent {agent} does not store {currency}')
 
-    # ------------- STEP ------------- #
+    # ------------- INSPECT ------------- #
     def view(self, view):
         """Return a dict with storage amount for single currency or all of a class"""
-        currency_type = self.model.currency_dict[view]['currency_type']
+        currency_type = self.model.currencies[view]['currency_type']
         if currency_type == 'currency':
             if view not in self.storage:
                 return {view: 0}
             return {view: self.storage[view]}
         elif currency_type == 'class':
-            class_currencies = self.model.currency_dict[view]['currencies']
+            class_currencies = self.model.currencies[view]['currencies']
             return {currency: self.storage[currency]
                     for currency in class_currencies
                     if currency in self.storage}
+        
+    def serialize(self):
+        """Return json-serializable dict of agent attributes"""
+        serializable = {'agent_id', 'amount', 'description', 'agent_class', 
+                        'properties', 'capacity', 'thresholds', 'flows',
+                        'cause_of_death', 'active', 'storage', 'attributes'}
+        output = {k: deepcopy(getattr(self, k)) for k in serializable}
+        return output
 
+    def get_records(self, static=False, clear_cache=False):
+        """Return records dict and optionally clear cache"""
+        output = deepcopy(self.records)
+        if static:
+            static_records = self.serialize()
+            non_static = ('cause_of_death', 'active', 'storage', 'attributes')
+            for k in non_static:
+                del static_records[k]
+            output['static'] = static_records
+        if clear_cache:
+            self.records = recursively_clear_lists(self.records)
+        return output
+
+    def save(self, records=False):
+        """Return a serializable copy of the agent"""
+        output = self.serialize()
+        if records:
+            output['records'] = self.get_records()
+        return output
+
+    # ------------- UPDATE ------------- #
     def increment(self, currency, value):
         """Increment currency in storage as available, return actual receipt"""
         if value < 0:  # Can be currency or currency_class
@@ -95,17 +155,21 @@ class Agent:
                 self.storage[currency] += amount
             return increment
         elif value > 0:  # Can only be currency
-            if self.model.currency_dict[currency]['currency_type'] != 'currency':
-                raise ValueError(f'Cannot increment currency by class ({currency})')
+            if self.model.currencies[currency]['currency_type'] != 'currency':
+                raise ValueError(f'Cannot increment agent by currency class ({currency})')
+            if currency not in self.capacity:
+                raise ValueError(f'Agent does not store {currency}')
             if currency not in self.storage:
                 self.storage[currency] = 0
             remaining_capacity = self.capacity[currency] - self.storage[currency]
             actual = round(min(value, remaining_capacity), self.model.floating_point_accuracy)
             self.storage[currency] += actual
             return {currency: actual}
-
-    def get_step_value(self, dT, direction, currency, flow, influx):
-        """Return the baseline step value. Overloadable by subclasses."""
+        
+    def get_flow_value(self, dT, direction, currency, flow, influx):
+        """Update flow state pre-exchange and return target value. 
+        
+        Overloadable by subclasses."""
         # Baseline
         step_value = flow['value'] * dT
         # Adjust
@@ -121,12 +185,12 @@ class Agent:
             buffer_attr = f'{direction}_{currency}_criteria_buffer'
             if evaluate_reference(self, criteria):
                 if 'buffer' in criteria and self.attributes[buffer_attr] > 0:
-                    self.attributes[buffer_attr] -= 1
+                    self.attributes[buffer_attr] -= dT
                     step_value = 0
             else:
+                step_value = 0
                 if 'buffer' in criteria and self.attributes[buffer_attr] == 0:
                     self.attributes[buffer_attr] = criteria['buffer']
-                step_value = 0
         growth = flow.get('growth')
         if step_value > 0 and growth:
             for mode, params in growth.items():
@@ -134,7 +198,6 @@ class Agent:
                 growth_factor = evaluate_growth(self, mode, params)
                 self.attributes[growth_attr] = growth_factor
                 step_value *= growth_factor
-
         weighted = flow.get('weighted')
         if step_value > 0 and weighted:
             for field in weighted:
@@ -149,15 +212,34 @@ class Agent:
                                      f'{self.agent_id} storage, properties, or attributes.')
                 if field == 'growth_rate':
                     weight *= 2  # For an un-skewed sigmoid curve, max height is 2x mean
-                    # TODO: Move to PlantAgent._get_step_value
+                    # TODO: Move to PlantAgent._get_flow_value
                 step_value *= weight
         return step_value
+    
+    def process_flow(self, dT, direction, currency, flow, influx, target, actual):
+        """Update flow state post-exchange. Overloadable by subclasses."""
+        available_ratio = 0 if target == 0 else 1 - actual/target
+        if direction == 'in':
+            influx[currency] = available_ratio
+        if 'deprive' in flow:
+            deprive_attr = f'{direction}_{currency}_deprive'
+            if available_ratio < 1:
+                deprived_ratio = 1 - available_ratio
+                remaining = self.attributes[deprive_attr] - (deprived_ratio * dT)
+                self.attributes[deprive_attr] = max(0, remaining)
+                if remaining < 0:
+                    n_dead = math.ceil(-remaining * self.active)
+                    self.kill(f'{self.agent_id} deprived of {currency}', n_dead=n_dead)
+            else:
+                self.attributes[deprive_attr] = flow['deprive']['value']
+
 
     def step(self, dT=1):
-        """Update agent for given timedelta. Overloadable by subclasses."""
+        """Update agent for given timedelta."""
         if not self.registered:
             self.register()
         if self.active:
+            self.attributes['age'] += dT
             # Check thresholds
             for currency, threshold in self.thresholds.items():
                 if evaluate_reference(self, threshold):
@@ -166,18 +248,16 @@ class Agent:
         # Execute flows
         influx = {}  # Which currencies were consumed, and what fraction of baseline
         for direction in ['in', 'out']:
-            if direction not in self.flows:
-                continue
             for currency, flow in self.flows[direction].items():
 
                 # Calculate Target Value
                 if self.active and 'value' in flow:
-                    target_value = self.active * self.get_step_value(dT, direction, currency, flow, influx)
+                    target = self.active * self.get_flow_value(dT, direction, currency, flow, influx)
                 else:
-                    target_value = 0
+                    target = 0
 
                 # Process Flow
-                remaining = float(target_value)
+                remaining = float(target)
                 for connection in flow['connections']:
                     if remaining > 0:
                         agent = self.model.agents[connection]
@@ -190,25 +270,12 @@ class Agent:
 
                     # NOTE: This should be called regardless of whether the agent is active
                     self.records['flows'][direction][currency][connection].append(exchange_value)
+                actual = target - remaining
 
                 # Respond to availability
-                available_ratio = 0 if target_value == 0 else 1 - (remaining / target_value)
-                if direction == 'in':
-                    influx[currency] = available_ratio
-                if 'deprive' in flow:
-                    deprive_attr = f'{direction}_{currency}_deprive'
-                    if available_ratio < 1:
-                        deprived_ratio = 1 - available_ratio
-                        remaining = self.attributes[deprive_attr] - deprived_ratio
-                        self.attributes[deprive_attr] = max(0, remaining)
-                        if remaining < 0:
-                            n_dead = math.ceil(-remaining * self.active)
-                            self.kill(f'{self.agent_id} deprived of {currency}', n_dead=n_dead)
-                    else:
-                        self.attributes[deprive_attr] = flow['deprive']['value']
+                self.process_flow(dT, direction, currency, flow, influx, target, actual)
 
         # Update remaining records
-        self.records['step_num'].append(self.model.step_num)
         self.records['active'].append(self.active)
         for currency in self.storage:
             self.records['storage'][currency].append(self.storage[currency])
@@ -218,45 +285,7 @@ class Agent:
 
     def kill(self, reason, n_dead=None):
         """Kill n_dead agents, or all if n_dead is None. Overloadable by subclasses."""
-        n_dead = n_dead or self.active
+        n_dead = self.active if n_dead is None else n_dead
         self.active = max(0, self.active - n_dead)
         if self.active <= 0:
             self.cause_of_death = reason
-
-    # ------------- INSPECT ------------- #
-    def get_records(self, static_fields=False, clear_cache=False):
-        """Return records dict and optionally clear cache"""
-        output = deepcopy(self.records)
-        if static_fields:
-            output['agent_id'] = self.agent_id
-            output['amount'] = self.amount
-            output['description'] = self.description
-            output['agent_class'] = self.agent_class
-            output['properties'] = deepcopy(self.properties)
-            output['capacity'] = deepcopy(self.capacity)
-            output['thresholds'] = deepcopy(self.thresholds)
-            output['flows'] = deepcopy(self.flows)
-        if clear_cache:
-            def recursively_clear_lists(r):
-                if isinstance(r, dict):
-                    return {k: recursively_clear_lists(v) for k, v in r.items()}
-                elif isinstance(r, list):
-                    return []
-            self.records = recursively_clear_lists(self.records)
-        return output
-
-    def export(self):
-        """Return a serializable copy of the agent"""
-        return {
-            'agent_id': self.agent_id,
-            'amount': self.amount,
-            'description': self.description,
-            'agent_class': self.agent_class,
-            'properties': self.properties,
-            'capacity': self.capacity,
-            'thresholds': self.thresholds,
-            'flows': self.flows,
-            'active': self.active,
-            'storage': self.storage,
-            'attributes': self.attributes,
-        }
