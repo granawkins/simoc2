@@ -58,6 +58,13 @@ class Agent:
             return
         if 'age' not in self.attributes:
             self.attributes['age'] = 0
+        for currency in self.storage:
+            if currency not in self.capacity:
+                raise ValueError(f'Agent {self.agent_id} has storage for '
+                                 f'{currency} but no capacity.')
+            elif self.storage[currency] > self.capacity[currency]:
+                raise ValueError(f'Agent {self.agent_id} has more storage '
+                                 f'for {currency} than capacity.')
         # Initialize flow attributes and records, check connections
         flow_records = {'in': {}, 'out': {}}
         for direction, flows in self.flows.items():
@@ -203,12 +210,12 @@ class Agent:
             for field in weighted:
                 if field in self.storage:  # e.g. Biomass
                     weight = self.storage[field] / self.active
-                elif field in self.properties:  # e.g. 'grown'
+                elif field in self.properties:  # e.g. 'mass'
                     weight = self.properties[field]['value']
                 elif field in self.attributes:  # e.g. 'te_factor'
                     weight = self.attributes[field]
                 else:
-                    raise ValueError(f'Weighted field {weight} not found in '
+                    raise ValueError(f'Weighted field {field} not found in '
                                      f'{self.agent_id} storage, properties, or attributes.')
                 if field == 'growth_rate':
                     weight *= 2  # For an un-skewed sigmoid curve, max height is 2x mean
@@ -218,7 +225,7 @@ class Agent:
     
     def process_flow(self, dT, direction, currency, flow, influx, target, actual):
         """Update flow state post-exchange. Overloadable by subclasses."""
-        available_ratio = 0 if target == 0 else 1 - actual/target
+        available_ratio = 0 if target == 0 else actual/target
         if direction == 'in':
             influx[currency] = available_ratio
         if 'deprive' in flow:

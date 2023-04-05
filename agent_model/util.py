@@ -72,10 +72,13 @@ def evaluate_reference(agent, reference):
     # Parse connected agent
     if path.startswith('in_') or path.startswith('out_'):
         # Evaluate connections by direction/currency
-        elements = path.split('_')
-        direction, currency = elements[0], elements[1]
+        direction, remainder = path.split('_', 1)
+        if path.endswith('_ratio'):
+            currency = '_'.join(remainder.split('_')[:-1])
+        else:
+            currency = remainder
         conns = agent.flows[direction][currency]['connections']
-        updated_reference = {**reference, 'path': '_'.join(elements[1:])}
+        updated_reference = {**reference, 'path': remainder}
         results = (evaluate_reference(agent.model.agents[c], updated_reference) for c in conns)
         # Return group eval connections
         if 'connections' in reference and reference['connections'] == 'all':
@@ -88,7 +91,7 @@ def evaluate_reference(agent, reference):
         target = ref_agent.storage[path]
     elif path.endswith('_ratio'):
         currency = path[:-6]
-        currency_data = ref_agent.model.currency_dict[currency]
+        currency_data = ref_agent.model.currencies[currency]
         total = sum(ref_agent.view(currency_data['class']).values())
         target = 0 if not total else ref_agent.storage[currency] / total
     # Evaluate
@@ -134,13 +137,12 @@ def evaluate_growth(agent, mode, params):
         rate = agent.model.time.hour / 24
     elif mode == 'lifetime':
         rate = agent.attributes['age'] / agent.properties['lifetime']['value']
-    growth_type = params.pop('type')
     growth_func = {
         'norm': sample_norm,
         'sigmoid': sample_sigmoid,
         'clipped': sample_clipped_norm,
-    }[growth_type]
-    return growth_func(rate, **params)
+    }[params['type']]
+    return growth_func(rate, **{k: v for k, v in params.items() if k != 'type'})
 
 # WORKING WITH OUTPUTS
 
