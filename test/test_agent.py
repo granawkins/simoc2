@@ -1,272 +1,803 @@
 import copy
+import datetime
 import pytest
-from pytest import approx
-
 from ..agent_model.Agent import Agent
-from ..agent_model.Model import Model
-from ..agent_model.util import load_data_file
-
-class MockModel:
-    def __init__(self):
-        self.floating_point_accuracy = 6
-        self.step_num = 0
-        self.currency_dict = Model.build_currency_dict()
-        self.agents = {}
-
-    def register_agents(self):
-        for agent in self.agents.values():
-            agent.register()
-
-    def step(self, n_steps=1):
-        for _ in range(n_steps):
-            for agent in self.agents.values():
-                agent.step()
 
 @pytest.fixture
-def default_kwargs():
-    return dict(
-        amount=1,
-        description='',
-        agent_class='',
-        properties={},
-        capacity={},
-        thresholds={},
-        flows={'in': {}, 'out': {}},
-        active=1,
-        storage={},
-        attributes={},
-    )
-
-@pytest.fixture
-def agent_kwargs():
-    return dict(
-        amount=10,
-        description='Behaves like a human',
-        agent_class='test',
-        properties={'activity_level': {'value': 0.5}, 'mass_ratio': {'value': 0.5, 'unit': 'kg'}},
-        capacity={'ch4': .01},
-        thresholds={'o2': {'path': 'in_o2_ratio', 'limit': '<', 'value': .14, 'connections': 'all'},
-                    'ch4': {'path': 'ch4', 'limit': '>', 'value': .009}},
-        flows={'in': {
-            'o2': {
-                'value': .03,
-                'flow_rate': {'unit': 'kg', 'time': 'hour'},
-                'deprive': {'value': 2, 'unit': 'hour'},
-                'weighted': ['activity_level', 'mass_ratio'],
-                'connections': ['test_habitat', 'test_o2_mask'],
-            },
-            'ch4': {
-                'value': .001,
-                'flow_rate': {'unit': 'kg', 'time': 'hour'},
-                'criteria': {'path': 'in_ch4_ratio', 'limit': '>', 'value': .001, 'buffer': 2},
-                'connections': ['test_habitat'],
-            }
-        }, 'out': {
-            'co2': {
-                'value': .03,
-                'flow_rate': {'unit': 'kg', 'time': 'hour'},
-                'requires': ['o2'],
-                'connections': ['test_habitat'],
-            },
-            'ch4': {
-                'value': .001,
-                'flow_rate': {'unit': 'kg', 'time': 'hour'},
-                'connections': ['test_agent'],
-                'requires': ['ch4'],
-            }
+def kwargs():
+    return {
+        'model': object(),
+        'agent_id': 'test_agent',
+        'amount': 10,
+        'description': 'test_description',
+        'agent_class': 'test_agent_class',
+        'properties': {'test_property': {'value': 1}},
+        'capacity': {'test_currency': 2},
+        'thresholds': {'test_currency': {
+            'path': 'test_currency',
+            'limit': '<',
+            'value': 0.5,
         }},
-        storage={'ch4': 0.0},
-        attributes={},
-    )
-
-@pytest.fixture
-def habitat_kwargs():
-    return dict(
-        capacity={'n2': 100, 'o2': 100, 'co2': 100, 'ch4': 100},
-        storage={'n2': 80, 'o2': 19.5, 'co2': 0.38, 'ch4': 0.12},
-    )
-
-@pytest.fixture
-def o2_mask_kwargs():
-    return dict(
-        storage={'o2': 5},
-        capacity={'o2': 5},
-    )
-
-def test_agent_register(default_kwargs, agent_kwargs, habitat_kwargs, o2_mask_kwargs):
-
-    # __init__
-    # Default (empty) agent
-    model = MockModel()
-    agent = Agent('test_agent', model)
-    for k, v in default_kwargs.items():
-        assert getattr(agent, k) == v
-
-    # All kwargs
-    model = MockModel()
-    model.agents = {
-        'test_agent': Agent('test_agent', model, **agent_kwargs),
-        'test_habitat': Agent('test_habitat', model, **habitat_kwargs),
-        'test_o2_mask': Agent('test_o2_mask', model, **o2_mask_kwargs),
-    }
-    kwargs = (agent_kwargs, habitat_kwargs, o2_mask_kwargs)
-    for agent, _kwargs in zip(model.agents.values(), kwargs):
-        for k, v in _kwargs.items():
-            assert str(getattr(agent, k)) == str(v)
-
-    # register, register_flow
-    for agent in model.agents.values():
-        agent.register()
-    agent = model.agents['test_agent']
-    assert agent.registered
-    assert str(agent.records) == str({
-        'step_num': [0],
-        'active': [10],
-        'cause_of_death': None,
-        'storage': {'ch4': [0.0]},
-        'attributes': {
-            'in_o2_deprive': [2],
-            'in_ch4_criteria_buffer': [2]},
         'flows': {
-            'in': {'o2': {'test_habitat': [0], 'test_o2_mask': [0]},
-                   'ch4': {'test_habitat': [0]}},
-            'out': {'co2': {'test_habitat': [0]},
-                    'ch4': {'test_agent': [0]}}}})
+            'in': {
+                'test_currency': {
+                    'value': 1,
+                    'connections': ['test_agent_2']
+                }
+            },
+            'out': {
+                'test_currency': {
+                    'value': 1,
+                    'connections': ['test_agent_2']
+                }
+            }
+        },
+        'cause_of_death': 'test_death',
+        'active': 5,
+        'storage': {'test_currency': 1},
+        'attributes': {'test_attribute': 1},
+    }
+
+class TestAgentInit:
+    def test_agent_init_empty(self):
+        """Confirm that all attributes are set correctly when no kwargs are passed"""
+        model = object()
+        test_agent = Agent(model, 'test_agent')
+        assert test_agent.agent_id == 'test_agent'
+        assert test_agent.amount == 1
+        assert test_agent.model == model
+        assert test_agent.registered == False
+        assert test_agent.cause_of_death == None
+        assert str(test_agent.flows) == str({'in': {}, 'out': {}})
+        empty_strings = {'description', 'agent_class'}
+        empty_dicts = {'properties', 'capacity', 'thresholds', 'storage', 'attributes', 'records'}
+        for k in empty_strings:
+            assert getattr(test_agent, k) == ''
+        for k in empty_dicts:
+            assert str(getattr(test_agent, k)) == str({})
+
+    def test_agent_init_full(self, kwargs):
+        """Confirm that all kwargs are set correctly"""
+        test_agent = Agent(**kwargs)
+        for k, v in kwargs.items():
+            assert str(getattr(test_agent, k)) == str(v)
+        
+    def test_agent_init_kwargs_immutable(self, kwargs):
+        """Test that the kwargs passed to Agent.__init__() are immutable.
+
+        We pass a set of kwargs to the Agent class and modify them outside of 
+        the class. Then, we confirm that the Agent's internal attributes are 
+        not modified by the external changes to the kwargs object. This test 
+        ensures that the Agent's initialization process correctly creates
+        a copy of the kwargs object to ensure immutability."""
+        test_agent = Agent(**kwargs)
+        # Confirm that class is not 
+        def recursively_modify_kwargs(obj):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    obj[k] = recursively_modify_kwargs(v)
+            elif isinstance(obj, object):
+                return object()
+            elif isinstance(obj, list):
+                return [recursively_modify_kwargs(i) for i in obj]
+            elif isinstance(obj, (int, float)):
+                return obj + 1
+            else:
+                return f'{obj}_modified'
+        recursively_modify_kwargs(kwargs)
+        for k, v in kwargs.items():
+            assert str(getattr(test_agent, k)) != str(v)
 
 @pytest.fixture
-def dummy_model(agent_kwargs, habitat_kwargs, o2_mask_kwargs):
-    model = MockModel()
-    model.agents = {
-        'test_agent': Agent('test_agent', model, **agent_kwargs),
-        'test_habitat': Agent('test_habitat', model, **habitat_kwargs),
-        'test_o2_mask': Agent('test_o2_mask', model, **o2_mask_kwargs),
+def mock_model():
+    class MockModel:
+        floating_point_accuracy = 6
+        agents = {}
+        time = datetime.datetime(2020, 1, 1)
+    return MockModel()
+
+@pytest.fixture
+def basic_model(mock_model, kwargs):
+    test_agent = Agent(**{**kwargs, 'model': mock_model})
+    test_agent_2 = Agent(mock_model, 'test_agent_2', capacity={'test_currency': 2})
+    mock_model.agents = {
+        'test_agent': test_agent, 
+        'test_agent_2': test_agent_2
     }
-    model.register_agents()
-    return model
+    return mock_model
 
-def test_agent_storage(dummy_model):
+class TestAgentRegister:
+    def test_agent_register_empty(self):
+        """Confirm that all attributes set correctly when no kwargs passed"""
+        test_agent = Agent(object(), 'test_agent')
+        assert test_agent.registered == False
+        test_agent.register()
+        assert test_agent.registered == True
+        assert test_agent.attributes == {'age': 0}
+        assert test_agent.records['active'] == []
+        assert test_agent.records['cause_of_death'] == None
+        assert test_agent.records['storage'] == {}
+        assert test_agent.records['attributes'] == {'age': []}
+        assert test_agent.records['flows'] == {'in': {}, 'out': {}}
 
-    # view
-    agent = dummy_model.agents['test_agent']
-    habitat = dummy_model.agents['test_habitat']
-    assert str(agent.view('co2')) == str({'co2': 0})
-    assert str(habitat.view('co2')) == str({'co2': 0.38})
-    assert str(habitat.view('atmosphere')) == str({'o2': 19.5, 'co2': 0.38, 'n2': 80, 'ch4': 0.12})
-    assert str(habitat.view('food')) == str({})
+    def test_agent_register_full_missing_connection(self, basic_model):
+        """Confirm that an error is raised if connection agent not in model"""
+        test_agent = basic_model.agents['test_agent']
+        basic_model.agents.pop('test_agent_2')
+        with pytest.raises(ValueError):
+            test_agent.register()
+        assert test_agent.registered == False
 
-    # increment
-    assert str(habitat.increment('co2', -.001)) == str({'co2': -0.001})
-    assert str(habitat.view('co2')) == str({'co2': 0.379})
-    # if not enough in storage, do as much as is available
-    assert str(habitat.increment('co2', -10)) == str({'co2': -0.379})
-    assert str(habitat.view('co2')) == str({'co2': 0.0})
-    # if over-capacity, take as much as possible
-    assert str(habitat.increment('n2', 30)) == str({'n2': 20})
-    assert str(habitat.view('n2')) == str({'n2': 100})
-    # for groups, return proportional amount
-    group_increment = habitat.increment('atmosphere', -1)
-    assert sum(group_increment.values()) == approx(-1)
+    def test_agent_register_full_missing_currency(self, basic_model):
+        """Confirm that an error is raised if capacity missing for storage"""
+        test_agent = basic_model.agents['test_agent']
+        basic_model.agents['test_agent_2'].capacity.pop('test_currency')
+        with pytest.raises(ValueError):
+            test_agent.register()
+        assert test_agent.registered == False
 
-def test_agent_get_step_value(dummy_model):
-    agent = dummy_model.agents['test_agent']
+    def test_agent_register_full_missing_capacity(self, basic_model):
+        """Confirm that an error is raised if initial storage greater than capacity"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.capacity['test_currency'] = 0
+        with pytest.raises(ValueError):
+            test_agent.register()
+        assert test_agent.registered == False
 
-    # weighted
-    step_value = agent.get_step_value(
-        dT=1,
-        direction='in',
-        currency='o2',
-        flow=agent.flows['in']['o2'],
-        influx={})
-    assert step_value == (
-        0.03   # value
-        * 0.5  # properties.activity_level
-        * 0.5  # properties.mass_ratio
-    )
+    def test_agent_register_full(self, basic_model):
+        """Confirm that all fields set correctly when kwargs passed"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register()
+        assert test_agent.registered == True
+        assert test_agent.attributes == {'age': 0, 'test_attribute': 1}
+        assert test_agent.records['active'] == []
+        assert test_agent.records['storage'] == {'test_currency': []}
+        assert test_agent.records['attributes'] == {'age': [], 'test_attribute': []}
+        assert test_agent.records['flows'] == {
+            'in': {'test_currency': {'test_agent_2': []}}, 
+            'out': {'test_currency': {'test_agent_2': []}}
+        }
 
-    # requires
-    kwargs = dict(
-        dT=1,
-        direction='out',
-        currency='co2',
-        flow=agent.flows['out']['co2'],
-        influx={'o2': 0.25})
-    step_value = agent.get_step_value(**kwargs)
-    assert step_value == (
-        0.03   # value
-        * 0.25  # influx[o2]
-    )
-    kwargs['influx']['o2'] = 0.0
-    step_value = agent.get_step_value(**kwargs)
-    assert step_value == 0.0  # Return 0 if requirements not met
+    def test_agent_register_record_initial_state(self, basic_model):
+        """Confirm that initial state is recorded when requested"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        assert test_agent.records['active'] == [5]
+        assert test_agent.records['storage'] == {'test_currency': [1]}
+        assert test_agent.records['attributes'] == {'age': [0], 'test_attribute': [1]}
+        assert test_agent.records['flows'] == {
+            'in': {'test_currency': {'test_agent_2': [0]}},
+            'out': {'test_currency': {'test_agent_2': [0]}}
+        }
 
-    # criteria
-    kwargs = dict(dT=1,
-                  direction='in',
-                  currency='ch4',
-                  flow=agent.flows['in']['ch4'],
-                  influx={})
-    assert agent.attributes['in_ch4_criteria_buffer'] == 2
-    step_value = agent.get_step_value(**kwargs)
-    assert step_value == (0.0)  # Return 0 and increment buffer
-    assert agent.attributes['in_ch4_criteria_buffer'] == 1
-    step_value2 = agent.get_step_value(**kwargs)
-    assert step_value2 == (0.0)
-    step_value3 = agent.get_step_value(**kwargs)
-    assert step_value3 == (0.001)  # When buffer  is empty, return value
-    dummy_model.agents['test_habitat'].storage['ch4'] = 0
-    step_value4 = agent.get_step_value(**kwargs)
-    assert step_value4 == (0.0)  # If criteria false, reset buffer and return 0
-    assert agent.attributes['in_ch4_criteria_buffer'] == 2
+@pytest.fixture
+def flow():
+    return {
+        'value': 1,
+        'criteria': {
+            'buffer': 1,
+        },
+        'deprive': {
+            'value': 2,
+        },
+        'growth': {
+            'daily': {
+                'type': 'clipped',
+            },
+            'lifetime': {
+                'type': 'sigmoid'
+            }
+        },
+        'connections': ['test_agent_2'] 
+    }
 
-def test_agent_step_requires(dummy_model):
-    agent = Agent('test_agent', dummy_model, flows={
-            'in': {'n2': {'value': .001, 'connections': ['test_habitat'], 'requires': ['o2']},
-                   'o2': {'value': .001, 'connections': ['test_habitat']},
-                   'ch4': {'value': .001, 'connections': ['test_habitat'], 'requires': ['o2']}},
-            'out': {}})
-    dummy_model.agents['test_agent'] = agent
-    dummy_model.step(2)
-    dummy_model.agents['test_habitat'].storage['o2'] = 0.0005
-    dummy_model.step(2)
-    assert agent.records['flows']['in']['n2']['test_habitat'] == [0, 0, 0, 0, 0]  # before  step, no flow
-    assert agent.records['flows']['in']['ch4']['test_habitat'] == [0, -0.001, -0.001, -0.0005, 0]  # dependent and weighted
+class TestAgentRegisterFlow:
+    def test_agent_register_flow(self, basic_model, flow):
+        """Confirm that all flow attributes are set correctly"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.properties['lifetime'] = {'value': 100}
+        test_agent.flows['in']['test_currency'] = flow
+        test_agent.register(record_initial_state=True)
+        
+        for attr in [
+            'in_test_currency_criteria_buffer',
+            'in_test_currency_deprive',
+            'in_test_currency_daily_growth_factor',
+            'in_test_currency_lifetime_growth_factor',
+        ]:
+            assert attr in test_agent.attributes
+            assert len(test_agent.records['attributes'][attr]) == 1
 
-def test_agent_step_threshold(dummy_model):
-    agent = dummy_model.agents['test_agent']
-    assert agent.attributes['in_ch4_criteria_buffer'] == 2
-    assert agent.storage['ch4'] == 0
-    dummy_model.step()
-    assert agent.attributes['in_ch4_criteria_buffer'] == 1
-    dummy_model.step()
-    assert agent.attributes['in_ch4_criteria_buffer'] == 0
-    assert agent.storage['ch4'] == 0
-    dummy_model.step()
-    assert agent.storage['ch4'] == 0.01
-    dummy_model.step()
-    assert agent.active == 0
-    assert agent.cause_of_death == 'test_agent passed ch4 threshold'
+@pytest.fixture
+def mock_model_with_currencies(mock_model):
+    mock_model.currencies = {
+        'test_currency_1': {
+            'currency_type': 'currency', 
+            'class': 'test_currency_class'},
+        'test_currency_2': {
+            'currency_type': 'currency', 
+            'class': 'test_currency_class'},
+        'test_currency_class': {
+            'currency_type': 'class', 
+            'currencies': ['test_currency_1', 'test_currency_2']},
+    }
+    return mock_model
 
-def test_agent_step_connections(dummy_model):
-    # Force the habitat to run out of O2 and use o2 mask. have to remove threshold to do this.
-    habitat = dummy_model.agents['test_habitat']
-    habitat.storage['ch4'] = 0  # Don't kill agent
-    habitat.storage['o2'] = 0   # Force agent to use secondary ocnnection for o2
-    dummy_model.step(1)
-    o2_record = dummy_model.agents['test_agent'].records['flows']['in']['o2']
-    assert o2_record['test_o2_mask'][1] == -0.075
-    assert dummy_model.agents['test_agent'].active == 10
+class TestAgentView:
+    def test_agent_view_empty(self, mock_model_with_currencies):
+        """Confirm that view returns empty dict if no storage or capacity"""
+        test_agent = Agent(mock_model_with_currencies, 'test_agent')
+        test_agent.register()
+        assert test_agent.view('test_currency_1') == {'test_currency_1': 0}
+        assert test_agent.view('test_currency_2') == {'test_currency_2': 0}
+        assert test_agent.view('test_currency_class') == {}
 
-def test_agent_step_deprive(dummy_model):
-    dummy_model.agents['test_habitat'].storage['o2'] = 0
-    dummy_model.agents['test_o2_mask'].storage['o2'] = 0
-    agent = dummy_model.agents['test_agent']
-    del agent.thresholds['o2']
-    assert agent.attributes['in_o2_deprive'] == 2
-    dummy_model.step()
-    assert agent.attributes['in_o2_deprive'] == 1
-    dummy_model.step()
-    assert agent.attributes['in_o2_deprive'] == 0
-    assert agent.cause_of_death is None
-    dummy_model.step()
-    assert agent.cause_of_death == 'test_agent deprived of o2'
+    def test_agent_view_full(self, mock_model_with_currencies):
+        """Confirm view returns correct values for currency or currency class"""
+        test_agent = Agent(
+            mock_model_with_currencies, 
+            'test_agent',
+            storage={'test_currency_1': 1, 'test_currency_2': 2},
+            capacity={'test_currency_1': 1, 'test_currency_2': 2},
+        )
+        assert test_agent.view('test_currency_1') == {'test_currency_1': 1}
+        assert test_agent.view('test_currency_2') == {'test_currency_2': 2}
+        assert test_agent.view('test_currency_class') == {'test_currency_1': 1, 'test_currency_2': 2}
 
+    def test_agent_view_error(self, mock_model_with_currencies):
+        """Confirm that error is raised if view currency not in model"""
+        test_agent = Agent(mock_model_with_currencies, 'test_agent')
+        with pytest.raises(KeyError):
+            test_agent.view('test_currency_3')
+
+class TestAgentSerialize:
+    def test_agent_serialize(self, basic_model, kwargs):
+        """Confirm that all fields are serialized correctly"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register()
+        serialized = test_agent.serialize()
+        serializable = {'agent_id', 'amount', 'description', 'agent_class', 
+                        'properties', 'capacity', 'thresholds', 'flows',
+                        'cause_of_death', 'active', 'storage', 'attributes'}
+        assert set(serialized.keys()) == serializable
+        for key in serializable:
+            if key == 'attributes': 
+                assert serialized[key] == {'age': 0, 'test_attribute': 1}
+            else:
+                assert serialized[key] == kwargs[key]
+
+class TestAgentGetRecords:
+    def test_agent_get_records_basic(self, basic_model):
+        """Confirm that all fields are recorded correctly"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        records = test_agent.get_records()
+
+        assert records['active'] == [5]
+        assert records['cause_of_death'] == 'test_death'
+        assert records['storage'] == {'test_currency': [1]}
+        assert records['attributes'] == {'age': [0], 'test_attribute': [1]}
+        assert records['flows'] == {
+            'in': {'test_currency': {'test_agent_2': [0]}},
+            'out': {'test_currency': {'test_agent_2': [0]}}
+        }
+
+    def test_agent_get_records_static(self, basic_model, kwargs):
+        """Confirm that static fields are recorded correctly"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        records = test_agent.get_records(static=True)
+        static_keys = {'agent_id', 'amount', 'agent_class', 'description', 
+                       'properties', 'capacity', 'thresholds', 'flows'}
+        assert set(records['static'].keys()) == static_keys
+        for key in static_keys:
+            assert records['static'][key] == kwargs[key]
+
+    def test_agent_get_records_clear_cache(self, basic_model):
+        """Confirm that get_records clears cache when requested"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        test_agent.get_records(clear_cache=True)
+        def recursively_check_empty(dictionary):
+            for key in dictionary:
+                if isinstance(dictionary[key], dict):
+                    recursively_check_empty(dictionary[key])
+                elif isinstance(dictionary[key], list):
+                    assert dictionary[key] == []
+        recursively_check_empty(test_agent.records)
+
+class TestAgentSave:
+    def test_agent_save(self, basic_model, kwargs):
+        """Test that save returns a dictionary matching initialization"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        expected = copy.deepcopy(kwargs)
+        del expected['model']
+        expected['attributes'] = {'age': 0, 'test_attribute': 1}
+
+        saved = test_agent.save()        
+        assert saved == expected
+        assert 'records' not in saved
+
+    def test_agent_save_with_records(self, basic_model, kwargs):
+        """Test that records are included in save if requested"""
+        test_agent = basic_model.agents['test_agent']
+        test_agent.register(record_initial_state=True)
+        expected = copy.deepcopy(kwargs)
+        del expected['model']
+        expected['attributes'] = {'age': 0, 'test_attribute': 1}
+        expected['records'] = test_agent.get_records()
+
+        saved = test_agent.save(records=True)        
+        assert saved == expected
+
+class TestAgentIncrement:
+    def test_agent_increment_positive(self, mock_model_with_currencies):
+        """Test that increment correctly increments currencies"""
+        test_agent = Agent(
+            mock_model_with_currencies, 
+            'test_agent',
+            storage={'test_currency_1': 1},
+            capacity={'test_currency_1': 2},
+        )
+        # Test incrementing a single currency
+        receipt = test_agent.increment('test_currency_1', 1)
+        assert receipt == {'test_currency_1': 1}
+        assert test_agent.storage['test_currency_1'] == 2
+        # Test incrementing a single currency beyond capacity
+        receipt = test_agent.increment('test_currency_1', 1)
+        assert receipt == {'test_currency_1': 0}
+        assert test_agent.storage['test_currency_1'] == 2
+        # Test incrementing a currency without capacity
+        with pytest.raises(ValueError):
+            test_agent.increment('test_currency_2', 1)
+        # Test incrementing a currency class
+        with pytest.raises(ValueError):
+            test_agent.increment('test_currency_class', 1)
+
+    def test_agent_increment_negative(self, mock_model_with_currencies):
+        """Test that increment correctly decrements currencies"""
+        test_agent = Agent(
+            mock_model_with_currencies, 
+            'test_agent',
+            storage={'test_currency_1': 2, 'test_currency_2': 1},
+            capacity={'test_currency_1': 2, 'test_currency_2': 2},
+        )
+        # Test decrementing a single currency
+        receipt = test_agent.increment('test_currency_1', -1)
+        assert receipt == {'test_currency_1': -1}
+        assert test_agent.storage['test_currency_1'] == 1
+        # Test decrementing a currency class
+        receipt = test_agent.increment('test_currency_class', -1)
+        assert receipt == {'test_currency_1': -0.5, 'test_currency_2': -0.5}
+        assert test_agent.storage['test_currency_1'] == 0.5
+        assert test_agent.storage['test_currency_2'] == 0.5
+        # Test decrementing a currency class beyond stored
+        receipt = test_agent.increment('test_currency_class', -2)
+        assert receipt == {'test_currency_1': -0.5, 'test_currency_2': -0.5}
+        assert test_agent.storage['test_currency_1'] == 0
+        assert test_agent.storage['test_currency_2'] == 0
+
+@pytest.fixture
+def get_flow_value_kwargs(kwargs):
+    return {
+        'dT': 1,
+        'direction': 'in',
+        'currency': 'test_currency',
+        'flow': kwargs['flows']['in']['test_currency'],
+        'influx': {},
+    }
+
+class TestAgentGetFlowValue:
+    def test_agent_get_flow_value_basic(self, basic_model, get_flow_value_kwargs):
+        """Test that get_flow_value returns the correct value"""
+        test_agent = basic_model.agents['test_agent']
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 1
+        get_flow_value_kwargs['dT'] = 0.33
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0.33
+        
+    def test_agent_get_flow_value_requires(self, basic_model, get_flow_value_kwargs):
+        """Test that get_flow_value handles requires correctly"""
+        # Single Currency
+        test_agent = basic_model.agents['test_agent']
+        get_flow_value_kwargs['flow']['requires'] = ['test_currency_2']
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0    
+        get_flow_value_kwargs['influx'] = {'test_currency_2': 0.5}
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0.5
+        get_flow_value_kwargs['influx'] = {'test_currency_2': 1}
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 1
+
+        # Multiple Currencies
+        get_flow_value_kwargs['flow']['requires'] = ['test_currency_2', 'test_currency_3']
+        get_flow_value_kwargs['influx'] = {'test_currency_2': 0.5, 'test_currency_3': 0.5}
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0.25
+
+    def test_agent_get_flow_value_criteria_basic(self, basic_model, get_flow_value_kwargs):
+        # TODO: Move some of this to the test for evaluate_criteria.
+        test_agent = basic_model.agents['test_agent']
+        # Equality | Attribute
+        test_agent.flows['in']['test_currency']['criteria'] = {
+            'path': 'test_attribute',
+            'limit': '=',
+            'value': 1,
+        }
+        get_flow_value_kwargs['flow'] = test_agent.flows['in']['test_currency']
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 1
+        # Less than | Storage
+        test_agent.flows['in']['test_currency']['criteria'] = {
+            'path': 'test_currency',
+            'limit': '<',
+            'value': 1,
+        }
+        get_flow_value_kwargs['flow'] = test_agent.flows['in']['test_currency']
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0
+
+    def test_agent_get_flow_value_criteria_complex(self, mock_model_with_currencies):
+        # TODO: Move some of this to the test for evaluate_criteria.
+        # Greater than | Connection | Ratio
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            flows={
+                'in': {
+                    'test_currency_1': {
+                        'value': 1,
+                        'connections': ['test_agent_2'],
+                        'criteria': {
+                            'path': 'in_test_currency_1_ratio',
+                            'limit': '>',
+                            'value': 0.5,
+                            'buffer': 2,
+                        },
+                    }
+                },
+            }
+        )
+        test_agent_2 = Agent(
+            mock_model_with_currencies,
+            'test_agent_2',
+            capacity={'test_currency_1': 2, 'test_currency_2': 2},
+            storage={'test_currency_1': 2, 'test_currency_2': 2},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_agent_2': test_agent_2,
+        }
+        test_agent.register()
+        test_agent_2.register()
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
+        # Criteria evaluates False
+        get_flow_value_kwargs = dict(
+            dT=1, 
+            direction='in', 
+            currency='test_currency_1', 
+            flow=test_agent.flows['in']['test_currency_1'], 
+            influx={}
+        )
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
+        # Criteria evaluates True
+        test_agent_2.increment('test_currency_2', -1)
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 1
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 0
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 1
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 0
+        # Back to False
+        test_agent_2.increment('test_currency_2', 1)
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0
+        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
+        
+    def test_agent_get_flow_value_growth(self, basic_model, get_flow_value_kwargs):
+        test_agent = basic_model.agents['test_agent']
+        get_flow_value_kwargs['flow']['growth'] = {'lifetime': {'type': 'sigmoid'}}
+        test_agent.properties['lifetime'] = {'value': 10}
+        test_agent.attributes['age'] = 0
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert 0 < flow_value < 0.0001
+        test_agent.attributes['age'] = 5
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 0.5
+        test_agent.attributes['age'] = 10
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert 0.9999 < flow_value < 1
+        
+    def test_agent_get_flow_value_weighted(self, basic_model, get_flow_value_kwargs):
+        test_agent = basic_model.agents['test_agent']
+        test_agent.properties['test_property']['value'] = 0.5
+        test_agent.attributes['test_attribute'] = 0.5
+        test_agent.storage['test_currency'] = 10  # divided by active=5
+        get_flow_value_kwargs['flow']['weighted'] = [
+            'test_property', 'test_attribute', 'test_currency']
+        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
+        assert flow_value == 1 * 0.5 * 0.5 * 10 / 5
+        get_flow_value_kwargs['flow']['weighted'] = ['missing_weight']
+        with pytest.raises(ValueError):
+            test_agent.get_flow_value(**get_flow_value_kwargs)
+
+class TestAgentProcessFlow:
+    def test_process_flow_influx(self, mock_model_with_currencies):
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            flows={
+                'in': {
+                    'test_currency_1': {
+                        'value': 1,
+                        'connections': ['test_agent_2'],
+                    },
+                },
+                'out': {
+                    'test_currency_2': {
+                        'value': 1,
+                        'connections': ['test_agent_2'],
+                    },
+                }
+            }
+        )
+        test_agent_2 = Agent(
+            mock_model_with_currencies,
+            'test_agent_2',
+            capacity={'test_currency_1': 2, 'test_currency_2': 2},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_agent_2': test_agent_2,
+        }
+        test_agent.register()
+        test_agent_2.register()
+        influx = {}
+        for direction in ('in', 'out'):
+            currency = next(iter(test_agent.flows[direction]))
+            kwargs = dict(dT=1, direction=direction, currency=currency, 
+                          flow=test_agent.flows[direction][currency], influx=influx, 
+                          target=1, actual=1)
+            test_agent.process_flow(**kwargs)
+        assert influx == {'test_currency_1': 1}
+
+    def test_process_flow_deprive(self, mock_model_with_currencies):
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            amount=5,
+            flows={
+                'in': {
+                    'test_currency_1': {
+                        'value': 1,
+                        'connections': ['test_agent_2'],
+                        'deprive': {'value': 2}
+                    },
+                },
+            }
+        )
+        test_agent_2 = Agent(
+            mock_model_with_currencies,
+            'test_agent_2',
+            capacity={'test_currency_1': 2},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_agent_2': test_agent_2,
+        }
+        test_agent.register()
+        test_agent_2.register()
+        # Start with deprive buffer full
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 2
+        # Actual is equal to half of target; half of the active are deprived
+        process_kwargs = dict(dT=1, direction='in', currency='test_currency_1',
+                              flow=test_agent.flows['in']['test_currency_1'], influx={},
+                              target=10, actual=5)
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 1.5
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 1
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 0.5
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 0
+        # Deprive buffer is empty, so half of the active die
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.active == 2
+        # Actual is equal to target again, buffer resets
+        process_kwargs['actual'] = 10
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 2
+        # Actual equal to zero; all of active are deprived
+        process_kwargs['actual'] = 0
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.active == 2
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 1
+        # Buffer responds to DT
+        process_kwargs['dT'] = 0.5
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.active == 2
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 0.5
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.active == 2
+        assert test_agent.attributes['in_test_currency_1_deprive'] == 0
+        # When deprive buffer is empty, all active die (per dT)
+        process_kwargs['dT'] = 1
+        test_agent.process_flow(**process_kwargs)
+        assert test_agent.active == 0
+        assert test_agent.cause_of_death == 'test_agent deprived of test_currency_1'
+
+class TestAgentStep:
+    def test_agent_step_empty(self, basic_model):
+        test_agent = Agent(basic_model, 'test_agent')
+        assert not test_agent.registered
+        test_agent.step()
+        assert test_agent.registered
+        assert test_agent.records == {
+            'active': [1],
+            'cause_of_death': None,
+            'storage': {},
+            'attributes': {'age': [1]},
+            'flows': {'in': {}, 'out': {}}
+        }
+        test_agent.step()
+        assert test_agent.attributes['age'] == 2
+        assert test_agent.records['attributes']['age'] == [1, 2]
+        assert test_agent.records['active'] == [1, 1]
+
+    def test_agent_step_threshold(self, mock_model_with_currencies):
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            thresholds={'test_currency_1': {
+                'path': 'in_test_currency_1_ratio',
+                'limit': '<',
+                'value': 0.5,
+            }},
+            flows={'in': {'test_currency_1': {'connections': ['test_structure']}}},
+        )
+        test_structure = Agent(
+            mock_model_with_currencies,
+            'test_structure',
+            capacity={'test_currency_1': 10, 'test_currency_2': 10},
+            storage={'test_currency_1': 5, 'test_currency_2': 5},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_structure': test_structure,
+        }
+        test_agent.register()
+        test_structure.register()
+        # Threshold not met
+        test_agent.step()
+        assert test_agent.active
+        assert test_agent.cause_of_death == None
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [0]
+        assert test_agent.attributes['age'] == 1
+        # Threshold met
+        test_structure.storage['test_currency_1'] = 4.9
+        test_agent.step()
+        assert test_agent.active == 0
+        assert test_agent.cause_of_death == 'test_agent passed test_currency_1 threshold'
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [0, 0]
+        assert test_agent.attributes['age'] == 2
+        # Records continue to accumulate even after agent is dead, but age stays same
+        test_agent.step()
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [0, 0, 0]
+        assert test_agent.attributes['age'] == 2
+
+    def test_agent_step_flows(self, mock_model_with_currencies):
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            flows={
+                'in': {
+                    'test_currency_1': {
+                        'value': 1,
+                        'connections': ['test_structure'],
+                    }
+                },
+                'out': {
+                    'test_currency_2': {
+                        'value': 1,
+                        'connections': ['test_structure'],
+                    }
+                }
+            }
+        )
+        test_structure = Agent(
+            mock_model_with_currencies,
+            'test_structure',
+            capacity={'test_currency_1': 10, 'test_currency_2': 10},
+            storage={'test_currency_1': 5, 'test_currency_2': 5},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_structure': test_structure,
+        }
+        test_agent.register()
+        test_structure.register()
+        test_agent.step()
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [-1]
+        assert test_agent.records['flows']['out']['test_currency_2']['test_structure'] == [1]
+        assert test_structure.storage['test_currency_1'] == 4
+        assert test_structure.storage['test_currency_2'] == 6
+        test_agent.step(dT=0.5)
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [-1, -0.5]
+        assert test_agent.records['flows']['out']['test_currency_2']['test_structure'] == [1, 0.5]
+        assert test_structure.storage['test_currency_1'] == 3.5
+        assert test_structure.storage['test_currency_2'] == 6.5
+
+    def test_agent_step_multi_connections(self, mock_model_with_currencies):
+        test_agent = Agent(
+            mock_model_with_currencies,
+            'test_agent',
+            flows={
+                'in': {
+                    'test_currency_1': {
+                        'value': 2,
+                        'connections': ['test_structure_1', 'test_structure_2'],
+                    }
+                },
+            }
+        )
+        test_structure_1 = Agent(
+            mock_model_with_currencies,
+            'test_structure_1',
+            capacity={'test_currency_1': 10},
+            storage={'test_currency_1': 5},
+        )
+        test_structure_2 = Agent(
+            mock_model_with_currencies,
+            'test_structure_2',
+            capacity={'test_currency_1': 10},
+            storage={'test_currency_1': 5},
+        )
+        mock_model_with_currencies.agents = {
+            'test_agent': test_agent,
+            'test_structure_1': test_structure_1,
+            'test_structure_2': test_structure_2,
+        }
+        test_agent.register()
+        test_structure_1.register()
+        test_structure_2.register()
+
+        # If available, use first connection
+        test_agent.step()
+        assert test_agent.records['flows']['in']['test_currency_1'] == {
+            'test_structure_1': [-2],
+            'test_structure_2': [0],
+        }
+        assert test_structure_1.storage['test_currency_1'] == 3
+        assert test_structure_2.storage['test_currency_1'] == 5
+
+        # If partially available, split between first and second connections
+        test_structure_1.storage['test_currency_1'] = 1
+        test_agent.step()
+        test_agent.step()
+        assert test_agent.records['flows']['in']['test_currency_1'] == {
+            'test_structure_1': [-2, -1, 0],
+            'test_structure_2': [0, -1, -2],
+        }
+        assert test_structure_1.storage['test_currency_1'] == 0
+        assert test_structure_2.storage['test_currency_1'] == 2
+
+class TestAgentKill:
+    def test_agent_kill(self, basic_model):
+        test_agent = Agent(basic_model, 'test_agent', amount=2)
+        basic_model.agents = {'test_agent': test_agent}
+        test_agent.register()
+        test_agent.kill('test_reason', 1)
+        assert test_agent.active == 1
+        assert test_agent.cause_of_death == None
+        test_agent.kill('test_reason', 1)
+        assert test_agent.active == 0
+        assert test_agent.cause_of_death == 'test_reason'

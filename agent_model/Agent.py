@@ -278,6 +278,7 @@ class Agent:
                     # NOTE: This should be called regardless of whether the agent is active
                     self.records['flows'][direction][currency][connection].append(exchange_value)
                 actual = target - remaining
+                # TODO: Handle excess outputs; currently ignored
 
                 # Respond to availability
                 self.process_flow(dT, direction, currency, flow, influx, target, actual)
