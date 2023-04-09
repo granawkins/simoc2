@@ -62,7 +62,7 @@ new_agent_desc = {}
 for agent_class, agents in default_agent_desc.items():
     for agent_type, desc in agents.items():
         new_agent_desc[agent_type] = update_desc(agent_type, desc)
-        new_agent_desc[agent_type]['class'] = agent_class
+        new_agent_desc[agent_type]['agent_class'] = agent_class
 
 # SAVE NEW DATA FILES
 with open('data_files/agent_desc.json', 'w') as f:
