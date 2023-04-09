@@ -92,6 +92,8 @@ def model_kwargs():
         'elapsed_time': 0,
         'step_num': 0,
         'seed': 1000,
+        'is_terminated': False,
+        'termination_reason': 'test_termination',
     }
 
 class TestModel:
@@ -104,6 +106,8 @@ class TestModel:
         assert test_model.elapsed_time == datetime.timedelta()
         assert test_model.step_num == 0
         assert 0 <= test_model.seed <= 2**32 - 1
+        assert test_model.is_terminated is None
+        assert test_model.termination_reason == ''
         assert test_model.agents == {}
         assert test_model.currencies == {}
         assert test_model.rng == None
@@ -121,6 +125,8 @@ class TestModel:
         assert test_model.elapsed_time == datetime.timedelta(seconds=42)
         assert test_model.step_num == 100
         assert test_model.seed == model_kwargs['seed']
+        assert test_model.is_terminated is False
+        assert test_model.termination_reason == 'test_termination'
 
     def test_model_add_agent(self, model_kwargs):
         model = Model(**model_kwargs)
@@ -195,6 +201,19 @@ class TestModel:
         assert model.elapsed_time == datetime.timedelta(hours=1)
         assert model.records['time'] == ['2020-01-01T01:00:00']
         assert model.records['step_num'] == [1]
+
+    def test_model_terminate(self, model_kwargs):
+        for (unit, value) in (('day', 2), ('hour', 30)):
+            model_kwargs['termination'][0]['unit'] = unit
+            model_kwargs['termination'][0]['value'] = value
+            model = Model(**model_kwargs)
+            expected_steps = value * 24 if unit == 'day' else value
+            for _ in range(expected_steps - 1):
+                model.step()
+            assert not model.is_terminated
+            model.step()
+            assert model.is_terminated
+            assert model.termination_reason == 'time'
 
     def test_model_get_records(self, model_kwargs):
         model = Model.from_config({'o2_storage': {}}, {}, **model_kwargs)

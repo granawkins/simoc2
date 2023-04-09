@@ -89,6 +89,13 @@ class Agent:
 
     def register_flow(self, direction, currency, flow):
         """Check flow, setup attributes and records. Overloadable by subclasses."""
+        # Check flow fields
+        allowed_fields = {'value', 'flow_rate', 'criteria', 'connections', 
+                          'deprive', 'weighted', 'requires', 'growth'}
+        for field in flow:
+            if field not in allowed_fields:
+                raise ValueError(f'Flow field {field} not allowed')
+        # Initialize attributes
         if 'criteria' in flow and 'buffer' in flow['criteria']:
             buffer_attr = f'{direction}_{currency}_criteria_buffer'
             self.attributes[buffer_attr] = flow['criteria']['buffer']
@@ -99,6 +106,7 @@ class Agent:
             for mode, params in flow['growth'].items():
                 growth_attr = f'{direction}_{currency}_{mode}_growth_factor'
                 self.attributes[growth_attr] = evaluate_growth(self, mode, params)
+        # Check flow connections
         for agent in flow['connections']:
             if agent not in self.model.agents:
                 raise ValueError(f'Agent {agent} not registered')

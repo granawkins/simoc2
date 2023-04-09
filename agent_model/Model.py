@@ -17,9 +17,9 @@ class Model:
     floating_point_accuracy = FLOATING_POINT_ACCURACY
     time_unit = DEFAULT_TIME_UNIT
 
-    def __init__(self, termination=None, location=None, 
-                 priorities=None, start_time=None, elapsed_time=None, 
-                 step_num=None, seed=None):
+    def __init__(self, termination=None, location=None, priorities=None, 
+                 start_time=None, elapsed_time=None, step_num=None, seed=None, 
+                 is_terminated=None, termination_reason=None):
         
         # Initialize model data fields
         self.termination = [] if termination is None else termination
@@ -29,9 +29,11 @@ class Model:
         self.elapsed_time = datetime.timedelta(seconds=0 if elapsed_time is None else elapsed_time)
         self.step_num = 0 if step_num is None else step_num
         self.seed = seed if seed is not None else random.getrandbits(32)
+        self.is_terminated = None if is_terminated is None else is_terminated
+        self.termination_reason = '' if termination_reason is None else termination_reason
         self.agents = {}
         self.currencies = {}
-        
+
         # NON-SERIALIZABLE
         self.rng = None
         self.scheduler = None
@@ -99,8 +101,19 @@ class Model:
             self.register()
         self.step_num += 1
         self.elapsed_time += datetime.timedelta(**{self.time_unit: dT})
+        for term in self.termination:
+            if term['condition'] == 'time':
+                if term['unit'] in ('day', 'days'):
+                    reference = self.elapsed_time.days
+                elif term['unit'] in ('hour', 'hours'):
+                    reference = self.elapsed_time.total_seconds() // 3600
+                else:
+                    raise ValueError(f'Invalid termination time unit: '
+                                     f'{term["unit"]}')
+                if reference >= term['value']:
+                    self.is_terminated = True
+                    self.termination_reason = 'time'
         self.scheduler.step(dT)
-        # TODO: Evaluate termination conditions
         self.records['time'].append(self.time.isoformat())
         self.records['step_num'].append(self.step_num)
 
@@ -131,7 +144,9 @@ class Model:
             'start_time': self.start_time.isoformat(),
             'elapsed_time': self.elapsed_time.total_seconds(),
             'step_num': self.step_num,
-            'seed': self.seed
+            'seed': self.seed,
+            'is_terminated': self.is_terminated,
+            'termination_reason': self.termination_reason,
         }
         if records:
             output['records'] = deepcopy(self.records)
