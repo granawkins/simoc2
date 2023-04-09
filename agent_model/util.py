@@ -11,6 +11,8 @@ def load_data_file(fname, data_dir=None):
         # Get the absolute path of the directory containing the current script
         script_dir = Path(__file__).resolve().parent.parent
         data_dir = script_dir / 'data_files'
+    else:
+        data_dir = Path(data_dir)
     assert data_dir.exists(), f'Data directory does not exist: {data_dir}'
     data_file = data_dir / fname
     assert data_file.exists(), f'Data file does not exist: {data_file}'
@@ -111,15 +113,18 @@ def pdf(_x, std, cache={}):
 
 def sample_norm(rate, min_value=0, max_value=1, std=math.pi/10, center=0.5):
     """return the normalized sigmoid value"""
+    # Shift x-value to center at 0
     x = (rate - center) / std
     y = pdf(x, std)
-    norm_factor = pdf(0, std)
+    # Shift y-value to min/max range
+    norm_factor = pdf(0, std)  # First, set max=1
     normalized = y / norm_factor
     scaled = normalized * (max_value - min_value)
     shifted = scaled + min_value
     return shifted
 
 def sample_clipped_norm(rate, factor=2, **kwargs):
+    """return the clipped normalized sigmoid value"""
     norm_value = sample_norm(rate, **kwargs)
     norm_value *= factor
     return min(max(norm_value, 0), factor)

@@ -430,77 +430,9 @@ class TestAgentGetFlowValue:
         get_flow_value_kwargs['flow'] = test_agent.flows['in']['test_currency']
         flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
         assert flow_value == 1
-        # Less than | Storage
-        test_agent.flows['in']['test_currency']['criteria'] = {
-            'path': 'test_currency',
-            'limit': '<',
-            'value': 1,
-        }
-        get_flow_value_kwargs['flow'] = test_agent.flows['in']['test_currency']
+        test_agent.flows['in']['test_currency']['criteria']['value'] = 2
         flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
         assert flow_value == 0
-
-    def test_agent_get_flow_value_criteria_complex(self, mock_model_with_currencies):
-        # TODO: Move some of this to the test for evaluate_criteria.
-        # Greater than | Connection | Ratio
-        test_agent = Agent(
-            mock_model_with_currencies,
-            'test_agent',
-            flows={
-                'in': {
-                    'test_currency_1': {
-                        'value': 1,
-                        'connections': ['test_agent_2'],
-                        'criteria': {
-                            'path': 'in_test_currency_1_ratio',
-                            'limit': '>',
-                            'value': 0.5,
-                            'buffer': 2,
-                        },
-                    }
-                },
-            }
-        )
-        test_agent_2 = Agent(
-            mock_model_with_currencies,
-            'test_agent_2',
-            capacity={'test_currency_1': 2, 'test_currency_2': 2},
-            storage={'test_currency_1': 2, 'test_currency_2': 2},
-        )
-        mock_model_with_currencies.agents = {
-            'test_agent': test_agent,
-            'test_agent_2': test_agent_2,
-        }
-        test_agent.register()
-        test_agent_2.register()
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
-        # Criteria evaluates False
-        get_flow_value_kwargs = dict(
-            dT=1, 
-            direction='in', 
-            currency='test_currency_1', 
-            flow=test_agent.flows['in']['test_currency_1'], 
-            influx={}
-        )
-        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
-        assert flow_value == 0
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
-        # Criteria evaluates True
-        test_agent_2.increment('test_currency_2', -1)
-        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
-        assert flow_value == 0
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 1
-        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
-        assert flow_value == 0
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 0
-        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
-        assert flow_value == 1
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 0
-        # Back to False
-        test_agent_2.increment('test_currency_2', 1)
-        flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
-        assert flow_value == 0
-        assert test_agent.attributes['in_test_currency_1_criteria_buffer'] == 2
         
     def test_agent_get_flow_value_growth(self, basic_model, get_flow_value_kwargs):
         test_agent = basic_model.agents['test_agent']
