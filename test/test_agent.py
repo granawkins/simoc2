@@ -2,6 +2,7 @@ import copy
 import datetime
 import pytest
 from ..agent_model.Agent import Agent
+from ..agent_model.util import get_default_currency_data
 
 @pytest.fixture
 def kwargs():
@@ -94,6 +95,7 @@ def mock_model():
         floating_point_accuracy = 6
         agents = {}
         time = datetime.datetime(2020, 1, 1)
+        currencies = {'test_currency': {'currency_type': 'currency'}}
     return MockModel()
 
 @pytest.fixture

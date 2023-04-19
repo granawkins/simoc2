@@ -1,5 +1,6 @@
 import math
 from copy import deepcopy
+import numpy as np
 from .util import evaluate_reference, evaluate_growth, recursively_clear_lists
 
 class Agent:
@@ -110,8 +111,17 @@ class Agent:
         for agent in flow['connections']:
             if agent not in self.model.agents:
                 raise ValueError(f'Agent {agent} not registered')
-            if currency not in self.model.agents[agent].capacity:
-                raise ValueError(f'Agent {agent} does not store {currency}')
+            currency_type = self.model.currencies[currency]['currency_type']
+            if currency_type == 'currency':
+                if currency not in self.model.agents[agent].capacity:
+                    from IPython import embed; embed()
+                    raise ValueError(f'Agent {agent} does not store {currency}')
+            else:
+                class_currencies = self.model.currencies[currency]['currencies']
+                if not any(c in self.model.agents[agent].capacity 
+                           for c in class_currencies):
+                    raise ValueError(f'Agent {agent} does not store any '
+                                     f'currencies of class {currency}')
 
     # ------------- INSPECT ------------- #
     def view(self, view):
@@ -225,9 +235,6 @@ class Agent:
                 else:
                     raise ValueError(f'Weighted field {field} not found in '
                                      f'{self.agent_id} storage, properties, or attributes.')
-                if field == 'growth_rate':
-                    weight *= 2  # For an un-skewed sigmoid curve, max height is 2x mean
-                    # TODO: Move to PlantAgent._get_flow_value
                 step_value *= weight
         return step_value
     
@@ -305,3 +312,157 @@ class Agent:
         self.active = max(0, self.active - n_dead)
         if self.active <= 0:
             self.cause_of_death = reason
+
+class PlantAgent(Agent):
+    default_attributes = {
+        # Lifecycle
+        'delay_start': 0,
+        'age': 0,
+        'grown': False,
+        # Growth weights
+        'daily_growth_factor': 1,
+        'par_factor': 1,
+        'growth_rate': 0,
+        'cu_factor': 1,
+        'te_factor': 1,
+    }
+
+    """Plant agent with growth and reproduction."""
+    def __init__(self, *args, attributes=None, **kwargs):
+        attributes = {} if attributes is None else attributes
+        attributes = {**self.default_attributes, **attributes}
+        super().__init__(*args, attributes=attributes, **kwargs)
+        if self.attributes['delay_start'] > 0:
+            self.active = 0
+        # -- NON_SERIALIZED
+        self.daily_growth = []
+        self.max_growth = 0
+
+    def register(self, record_initial_state=False):
+        super().register(record_initial_state=record_initial_state)
+        # Create the `daily_growth` attribute:
+        # - Length is equal to the number of steps per day (e.g. 24)
+        # - Average value is always equal to 1
+        # - `photoperiod` is the number of hours per day of sunlight the plant
+        #   requires, which is centered about 12:00 noon. Values outside this
+        #   period are 0, and during this period are calculated such that the
+        #   mean of all numbers is 1.
+        steps_per_day = 24
+        photoperiod = self.properties['photoperiod']['value']
+        photo_start = (steps_per_day - photoperiod) // 2
+        photo_end = photo_start + photoperiod
+        photo_rate = steps_per_day / photoperiod
+        self.daily_growth = np.zeros(steps_per_day)
+        self.daily_growth[photo_start:photo_end] = photo_rate
+        
+        # Max Growth is used to determine the growth rate (% of ideal)
+        lifetime = self.properties['lifetime']['value']
+        mean_biomass = self.flows['out']['biomass']['value']
+        self.max_growth = mean_biomass * lifetime
+        
+        # To avoid intra-step fluctuation, we cache the response values in
+        # the model each step. TODO: This is a hack, and should be fixed.
+        if not hasattr(self.model, '_co2_response_cache'):
+            self.model._co2_response_cache = {
+                'step_num': 0,
+                'cu_factor': 1,
+                'te_factor': 1,
+            }
+
+    def get_flow_value(self, dT, direction, currency, flow, influx):
+        step_value = super().get_flow_value(dT, direction, currency, flow, influx)
+        if self.attributes['grown']:
+            if 'criteria' in flow and flow['criteria']['path'] != 'grown':
+                return 0.
+        return step_value
+    
+    def _calculate_co2_response(self):
+        if self.model._co2_response_cache['step_num'] != self.model.step_num:
+            ref_agent_name = self.flows['in']['co2']['conections'][0]
+            ref_agent = self.model.agents[ref_agent_name]
+            ref_atm = ref_agent.view('atmosphere')
+            co2_ppm = ref_atm['co2'] / sum(ref_atm.values()) * 1e6
+            co2_actual = max(350, min(co2_ppm, 700))
+            # CO2 Uptake Factor: Decrease growth if actual < ideal
+            if self.properties.get('carbon_fixation') == 'c4':
+                cu_ratio = 1
+            else:
+                # Standard equation found in research; gives *increase* in growth for eCO2
+                t_mean = 25 # Mean temperature for timestep.
+                tt = (163 - t_mean) / (5 - 0.1 * t_mean) # co2 compensation point
+                numerator = (co2_actual - tt) * (350 + 2 * tt)
+                denominator = (co2_actual + 2 * tt) * (350 - tt)
+                cu_ratio = numerator/denominator
+                # Invert the above to give *decrease* in growth for less than ideal CO2
+                crf_ideal = 1.2426059597016264  # At 700ppm, the above equation gives this value
+                cu_ratio = cu_ratio / crf_ideal
+            # Transpiration Efficiency Factor: Increase water usage if actual < ideal
+            co2_range = [350, 700]
+            te_range = [1/1.37, 1]  # Inverse of previously used
+            te_factor = np.interp(co2_actual, co2_range, te_range)
+            # Cache the values
+            self.model._co2_response_cache = {
+                'step_num': self.model.step_num,
+                'cu_factor': cu_ratio,
+                'te_factor': te_factor,
+            }
+        cached = self.model._co2_response_cache
+        return cached['cu_factor'], cached['te_factor']
+    
+    def step(self, dT=1):
+
+        # --- LIFECYCLE ---
+        # Delay start
+        if self.attributes['delay_start']:
+            self.attributes['delay_start'] -= dT
+            if self.attributes['delay_start'] <= 0:
+                self.active = self.amount
+        # Rproduction
+        if self.attributes['grown']:
+            if not self.properties['reproduce']['value']:
+                self.kill(f'{self.agent_id} reached end of life')
+            else:
+                self.active = self.amount
+                self.attributes = {**self.attributes, **self.default_attributes}
+        if self.attributes['age'] >= self.properties['lifetime']['value']:
+            self.attributes['grown'] = True
+        
+        # --- WEIGHTS ---
+        # Daily growth
+        hour_of_day = self.model.time.hour
+        self.attributes['daily_growth_factor'] = self.daily_growth[hour_of_day]
+        # Par Factor
+        light_agent = self.flows['in']['par']['connections'][0]
+        light_agent = self.model.agents[light_agent]
+        self.attributes['par_factor'] = light_agent.attributes['par_factor']
+        # Growth Rate
+        self.attributes['growth_rate'] = self.storage['biomass'] / self.max_growth
+        # CO2 response
+        cu_factor, te_factor = self._calculate_co2_response()
+        self.attributes['cu_factor'] = cu_factor
+        self.attributes['te_factor'] = te_factor
+
+        super().step(dT)
+
+    def kill(self, reason, n_dead=None):
+        # Convert dead biomass to inedible biomass
+        if n_dead is None:
+            n_dead = self.active
+        dead_biomass = self.storage['biomass'] * n_dead / self.active
+        self.storage['biomass'] -= dead_biomass
+        ined_bio_str_agent = self.flows['out']['inedible_biomass']['connections'][0]
+        ined_bio_str_agent = self.model.agents[ined_bio_str_agent]
+        ined_bio_str_agent.increment('inedible_biomass', dead_biomass)
+        super().kill(reason, n_dead=n_dead)
+
+class LightAgent(Agent):
+    default_attributes = {
+        'par_factor': 1,
+    }
+    def __init__(self, *args, attributes=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.default_attributes = {
+            'par_factor': 1,
+        }
+        self.attributes = {**self.default_attributes, **attributes}
+        self.active = self.amount

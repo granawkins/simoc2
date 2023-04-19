@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
-from agent_model.util import load_data_file
+from agent_model.util import load_data_file, get_default_currency_data
 
-# LOAD DEFAULT FILES
+# -----------------
+# UPDATE AGENT DESC
+# -----------------
 # Get path to data_files directory in SIMOC (above this directory)
 data_files = Path(__file__).parent.parent / 'simoc' / 'data_files'
 # Load default data files
@@ -38,6 +40,7 @@ def update_desc(agent_type, desc):
                     path = [path[-1], *path[:-1]]
                 f['criteria']['path'] = '_'.join(path)
             newDirection = direction[:-3]
+            f = {k: v for k, v in f.items() if k != 'required'}  # No longer used
             new_desc['flows'][newDirection][currency] = f
     for char in desc['data']['characteristics']:
         char_type = char['type']
@@ -52,6 +55,8 @@ def update_desc(agent_type, desc):
                 'value': char['value'],
                 'connections': 'all',  # Require every connection to evaluate true
             }
+        elif char_type == 'custom_function':
+            continue  # No longer used
         else:
             new_desc['properties'][char_type] = {k: v for k, v in char.items() if k != 'type'}
 
@@ -67,3 +72,61 @@ for agent_class, agents in default_agent_desc.items():
 # SAVE NEW DATA FILES
 with open('data_files/agent_desc.json', 'w') as f:
     json.dump(new_agent_desc, f, indent=4)
+
+# ---------------------
+# UPDATE CONFIGURATIONS
+# ---------------------
+config_names = [
+    '1h',
+    '1hg_sam',
+    '1hrad',
+    '4h',
+    '4hg',
+    'b2_base',
+    'b2_mission1a',
+    'b2_mission1b',
+    'b2_mission2',
+]
+currencies = get_default_currency_data()
+for config_name in config_names:
+    config = load_data_file(f'config_{config_name}.json', data_files)
+    reformatted_config = {'agents': {}}
+    allowed_kwargs = {'agents', 'currencies', 'termination', 'location',
+                      'priorities', 'start_time', 'elapsed_time', 'step_num', 
+                      'seed', 'is_terminated', 'termination_reason'}
+    ignore_kwargs = {'single_agent', 'total_amount', 'global_entropy', 
+                     'minutes_per_step'}
+    for k, v in config.items():
+        if k not in allowed_kwargs:
+            continue
+        if k != 'agents':
+            reformatted_config[k] = v
+            continue
+        for agent, agent_data in v.items():
+            reformatted_agent = {}
+            rename_agents = {'human_agent': 'human'}
+            # Special Cases
+            for field, value in agent_data.items():
+                ignore_fields = {'id', 'total_capacity'}
+                static_fields = {'amount'}
+                attribute_fields = {'carbonation'}
+                if field in ignore_fields:
+                    continue
+                elif field in static_fields:
+                    reformatted_agent[field] = value
+                elif field in attribute_fields:
+                    if 'attributes' not in reformatted_agent:
+                        reformatted_agent['attributes'] = {}
+                    reformatted_agent['attributes'][field] = value
+                elif field in currencies:
+                    if value == 0:
+                        continue  # These are now handled by capacity instead
+                    if 'storage' not in reformatted_agent:
+                        reformatted_agent['storage'] = {}
+                    reformatted_agent['storage'][field] = value
+                else:
+                    raise ValueError(f'Unknown field in agent data: {field}: {value}')
+            new_name = rename_agents.get(agent, agent)
+            reformatted_config['agents'][new_name] = reformatted_agent
+    with open(f'data_files/config_{config_name}.json', 'w') as f:
+        json.dump(reformatted_config, f, indent=4)

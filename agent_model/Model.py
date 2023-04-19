@@ -65,6 +65,19 @@ class Model:
         # Initialize an empty model
         model = cls(**kwargs)
 
+        # Overwrite generic connections
+        replacements = {'habitat': None, 'greenhouse': None}
+        for agent_id in agents.keys():
+            if 'habitat' in agent_id:
+                replacements['habitat'] = agent_id
+            elif 'greenhouse' in agent_id:
+                replacements['greenhouse'] = agent_id
+        def replace_generic_connections(conns):
+            """Replace if available, otherwise remove connection"""
+            replaced = [replacements.get(c, c) for c in conns]
+            pruned = [c for c in replaced if c is not None and c in agents]
+            return pruned
+
         # Merge user agents with default agents
         for agent_id, agent_data in agents.items():
             # TODO: Add a 'prototype' arg to specify default agent other than agent_id
@@ -72,8 +85,13 @@ class Model:
             if default_agent_data is not None:
                 # Merge user agent data with default agent data, if available
                 agent_data = merge_json(default_agent_data, deepcopy(agent_data))
-            # TODO: Select agent class based on agent_data
             agent_data['agent_id'] = agent_id
+            # Replace generic connections
+            if 'flows' in agent_data:
+                for flows in agent_data['flows'].values():
+                    for flow_data in flows.values():
+                        flow_data['connections'] = replace_generic_connections(flow_data['connections'])
+            # TODO: Select agent class based on agent_data
             agent = Agent(model, **agent_data)
             model.add_agent(agent_id, agent)
 
@@ -116,6 +134,16 @@ class Model:
         self.scheduler.step(dT)
         self.records['time'].append(self.time.isoformat())
         self.records['step_num'].append(self.step_num)
+
+    def run(self, dT=1, max_steps=365*24*2):
+        """Run the model until termination.
+        
+        Args:
+            dT (int, optional): delta time in base time units. Defaults to 1.
+            max_steps (int, optional): maximum number of steps to run. Defaults to 365*24*2.
+        """
+        while not self.is_terminated and self.step_num < max_steps:
+            self.step(dT)
 
     def get_records(self, static=False, clear_cache=False):
         output = deepcopy(self.records)

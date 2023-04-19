@@ -146,7 +146,6 @@
             "in": {
                 "feces": {
                     "value": 1.5,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -157,7 +156,6 @@
                 },
                 "o2": {
                     "value": 0.00045,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -168,7 +166,6 @@
                 },
                 "kwh": {
                     "value": 0.678,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kWh",
                         "time": "hour"
@@ -260,7 +257,6 @@
             "in": {
                 "urine": {
                     "value": 2.0,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -271,7 +267,6 @@
                 },
                 "kwh": {
                     "value": 1.501,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kWh",
                         "time": "hour"
@@ -333,7 +328,6 @@
             "in": {
                 "treated": {
                     "value": 4.75,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -344,7 +338,6 @@
                 },
                 "kwh": {
                     "value": 0.012,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kWh",
                         "time": "hour"
@@ -393,7 +386,6 @@
             "in": {
                 "potable": {
                     "value": 0.413,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -409,7 +401,6 @@
                 },
                 "kwh": {
                     "value": 0.959,
-                    "required": "mandatory",
                     "requires": [
                         "potable"
                     ],
@@ -474,7 +465,6 @@
             "in": {
                 "h2": {
                     "value": 0.00163,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -491,7 +481,6 @@
                 },
                 "co2": {
                     "value": 0.006534,
-                    "required": "mandatory",
                     "requires": [
                         "h2"
                     ],
@@ -511,7 +500,6 @@
                 },
                 "kwh": {
                     "value": 0.291,
-                    "required": "mandatory",
                     "requires": [
                         "co2"
                     ],
@@ -578,7 +566,6 @@
             "in": {
                 "co2": {
                     "value": 0.085,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -596,7 +583,6 @@
                 },
                 "kwh": {
                     "value": 0.65,
-                    "required": "mandatory",
                     "requires": [
                         "co2"
                     ],
@@ -612,7 +598,6 @@
             "out": {
                 "co2": {
                     "value": 0.085,
-                    "required": "mandatory",
                     "requires": [
                         "co2"
                     ],
@@ -649,7 +634,6 @@
             "in": {
                 "co2": {
                     "value": 0.085,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -668,7 +652,6 @@
             "out": {
                 "co2": {
                     "value": 0.085,
-                    "required": "mandatory",
                     "requires": [
                         "co2"
                     ],
@@ -706,7 +689,6 @@
             "in": {
                 "cont": {
                     "value": 0.12533,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -722,7 +704,6 @@
                 },
                 "kwh": {
                     "value": 1.12,
-                    "required": "mandatory",
                     "requires": [
                         "cont"
                     ],
@@ -760,7 +741,6 @@
             "in": {
                 "h2o": {
                     "value": 4.0,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -777,7 +757,6 @@
                 },
                 "kwh": {
                     "value": 0.5,
-                    "required": "mandatory",
                     "requires": [
                         "h2o"
                     ],
@@ -829,7 +808,6 @@
             "in": {
                 "ch4": {
                     "value": 0.02,
-                    "required": "mandatory",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -846,7 +824,6 @@
                 },
                 "kwh": {
                     "value": 0.2,
-                    "required": "mandatory",
                     "requires": [
                         "ch4"
                     ],
@@ -879,7 +856,6 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "required": "mandatory",
                     "criteria": {
                         "limit": "<",
                         "value": 0.2,
@@ -964,7 +940,6 @@
             "in": {
                 "co2": {
                     "value": 0.001571,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -985,7 +960,6 @@
                 },
                 "potable": {
                     "value": 0.116286,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1006,7 +980,6 @@
                 },
                 "fertilizer": {
                     "value": 6.6e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1180,7 +1153,6 @@
             "in": {
                 "co2": {
                     "value": 0.002547,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1201,7 +1173,6 @@
                 },
                 "potable": {
                     "value": 0.18849,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1222,7 +1193,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000107,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1396,7 +1366,6 @@
             "in": {
                 "co2": {
                     "value": 0.000336,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1417,7 +1386,6 @@
                 },
                 "potable": {
                     "value": 0.049222,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1438,7 +1406,6 @@
                 },
                 "fertilizer": {
                     "value": 2.8e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1612,7 +1579,6 @@
             "in": {
                 "co2": {
                     "value": 0.000537,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1633,7 +1599,6 @@
                 },
                 "potable": {
                     "value": 0.07877,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1654,7 +1619,6 @@
                 },
                 "fertilizer": {
                     "value": 4.5e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1828,7 +1792,6 @@
             "in": {
                 "co2": {
                     "value": 0.000573,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1849,7 +1812,6 @@
                 },
                 "potable": {
                     "value": 0.083963,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -1870,7 +1832,6 @@
                 },
                 "fertilizer": {
                     "value": 4.8e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2044,7 +2005,6 @@
             "in": {
                 "co2": {
                     "value": 0.00041,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2065,7 +2025,6 @@
                 },
                 "potable": {
                     "value": 0.06005,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2086,7 +2045,6 @@
                 },
                 "fertilizer": {
                     "value": 3.4e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2260,7 +2218,6 @@
             "in": {
                 "co2": {
                     "value": 0.000364,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2281,7 +2238,6 @@
                 },
                 "potable": {
                     "value": 0.053391,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2302,7 +2258,6 @@
                 },
                 "fertilizer": {
                     "value": 3.1e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2476,7 +2431,6 @@
             "in": {
                 "co2": {
                     "value": 0.001424,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2497,7 +2451,6 @@
                 },
                 "potable": {
                     "value": 0.508549,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2518,7 +2471,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000156,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2692,7 +2644,6 @@
             "in": {
                 "co2": {
                     "value": 0.001282,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2713,7 +2664,6 @@
                 },
                 "potable": {
                     "value": 0.457898,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2734,7 +2684,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000141,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2908,7 +2857,6 @@
             "in": {
                 "co2": {
                     "value": 0.000528,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2929,7 +2877,6 @@
                 },
                 "potable": {
                     "value": 0.18849,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -2950,7 +2897,6 @@
                 },
                 "fertilizer": {
                     "value": 5.8e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3124,7 +3070,6 @@
             "in": {
                 "co2": {
                     "value": 0.001129,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3145,7 +3090,6 @@
                 },
                 "potable": {
                     "value": 0.156993,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3166,7 +3110,6 @@
                 },
                 "fertilizer": {
                     "value": 9.3e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3340,7 +3283,6 @@
             "in": {
                 "co2": {
                     "value": 0.001219,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3361,7 +3303,6 @@
                 },
                 "potable": {
                     "value": 0.16956,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3382,7 +3323,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000101,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3556,7 +3496,6 @@
             "in": {
                 "co2": {
                     "value": 0.000506,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3577,7 +3516,6 @@
                 },
                 "potable": {
                     "value": 0.022703,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3598,7 +3536,6 @@
                 },
                 "fertilizer": {
                     "value": 2.7e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3772,7 +3709,6 @@
             "in": {
                 "co2": {
                     "value": 0.000569,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3793,7 +3729,6 @@
                 },
                 "potable": {
                     "value": 0.025541,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3814,7 +3749,6 @@
                 },
                 "fertilizer": {
                     "value": 3e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -3988,7 +3922,6 @@
             "in": {
                 "co2": {
                     "value": 0.001528,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4009,7 +3942,6 @@
                 },
                 "potable": {
                     "value": 0.545775,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4030,7 +3962,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000168,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4204,7 +4135,6 @@
             "in": {
                 "co2": {
                     "value": 0.001175,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4225,7 +4155,6 @@
                 },
                 "potable": {
                     "value": 0.163484,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4246,7 +4175,6 @@
                 },
                 "fertilizer": {
                     "value": 9.7e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4420,7 +4348,6 @@
             "in": {
                 "co2": {
                     "value": 0.001692,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4441,7 +4368,6 @@
                 },
                 "potable": {
                     "value": 0.604156,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4462,7 +4388,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000186,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4636,7 +4561,6 @@
             "in": {
                 "co2": {
                     "value": 0.000557,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4657,7 +4581,6 @@
                 },
                 "potable": {
                     "value": 0.024974,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4678,7 +4601,6 @@
                 },
                 "fertilizer": {
                     "value": 2.9e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4852,7 +4774,6 @@
             "in": {
                 "co2": {
                     "value": 0.000506,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4873,7 +4794,6 @@
                 },
                 "potable": {
                     "value": 0.022703,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -4894,7 +4814,6 @@
                 },
                 "fertilizer": {
                     "value": 2.7e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5068,7 +4987,6 @@
             "in": {
                 "co2": {
                     "value": 0.000758,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5089,7 +5007,6 @@
                 },
                 "potable": {
                     "value": 0.033987,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5110,7 +5027,6 @@
                 },
                 "fertilizer": {
                     "value": 4e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5284,7 +5200,6 @@
             "in": {
                 "co2": {
                     "value": 0.001898,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5305,7 +5220,6 @@
                 },
                 "potable": {
                     "value": 0.085137,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5326,7 +5240,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000101,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5500,7 +5413,6 @@
             "in": {
                 "co2": {
                     "value": 0.001663,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5521,7 +5433,6 @@
                 },
                 "potable": {
                     "value": 0.07458,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5542,7 +5453,6 @@
                 },
                 "fertilizer": {
                     "value": 8.8e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5716,7 +5626,6 @@
             "in": {
                 "co2": {
                     "value": 0.002547,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5737,7 +5646,6 @@
                 },
                 "potable": {
                     "value": 0.18849,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5758,7 +5666,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000107,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5932,7 +5839,6 @@
             "in": {
                 "co2": {
                     "value": 0.000437,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5953,7 +5859,6 @@
                 },
                 "potable": {
                     "value": 0.06407,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -5974,7 +5879,6 @@
                 },
                 "fertilizer": {
                     "value": 3.7e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6148,7 +6052,6 @@
             "in": {
                 "co2": {
                     "value": 0.002547,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6169,7 +6072,6 @@
                 },
                 "potable": {
                     "value": 0.18849,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6190,7 +6092,6 @@
                 },
                 "fertilizer": {
                     "value": 0.000107,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6364,7 +6265,6 @@
             "in": {
                 "co2": {
                     "value": 0.000968,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6385,7 +6285,6 @@
                 },
                 "potable": {
                     "value": 0.11718,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6406,7 +6305,6 @@
                 },
                 "fertilizer": {
                     "value": 7.4e-05,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kg",
                         "time": "hour"
@@ -6980,7 +6878,6 @@
             "in": {
                 "kwh": {
                     "value": 0.16733601070950468,
-                    "required": "desired",
                     "flow_rate": {
                         "unit": "kWh",
                         "time": "hour"
@@ -7009,32 +6906,6 @@
                         "daily_growth_factor"
                     ],
                     "connections": [
-                        "cabbage",
-                        "carrot",
-                        "celery",
-                        "chard",
-                        "corn",
-                        "dry_bean",
-                        "green_onion",
-                        "lettuce",
-                        "onion",
-                        "orchard",
-                        "pea",
-                        "peanut",
-                        "pepper",
-                        "radish",
-                        "red_beet",
-                        "rice",
-                        "snap_bean",
-                        "sorghum",
-                        "soybean",
-                        "spinach",
-                        "strawberry",
-                        "sweet_potato",
-                        "tomato",
-                        "vegetables",
-                        "wheat",
-                        "white_potato",
                         "lamp"
                     ]
                 }
