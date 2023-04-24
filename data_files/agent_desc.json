@@ -926,7 +926,7 @@
             "harvest_index": {
                 "value": 0.3
             },
-            "reproduce": {
+            "'reproduce'": {
                 "value": true
             },
             "density_factor": {
@@ -6815,11 +6815,7 @@
     "atmosphere_equalizer": {
         "amount": 1,
         "storage": {},
-        "properties": {
-            "custom_function": {
-                "value": "atmosphere_equalizer"
-            }
-        },
+        "properties": {},
         "flows": {
             "in": {
                 "atmosphere": {
@@ -6869,9 +6865,6 @@
             "par_baseline": {
                 "value": 5,
                 "unit": "mol/m2-hr"
-            },
-            "custom_function": {
-                "value": "electric_lamp"
             }
         },
         "flows": {
@@ -6906,6 +6899,32 @@
                         "daily_growth_factor"
                     ],
                     "connections": [
+                        "cabbage",
+                        "carrot",
+                        "celery",
+                        "chard",
+                        "corn",
+                        "dry_bean",
+                        "green_onion",
+                        "lettuce",
+                        "onion",
+                        "orchard",
+                        "pea",
+                        "peanut",
+                        "pepper",
+                        "radish",
+                        "red_beet",
+                        "rice",
+                        "snap_bean",
+                        "sorghum",
+                        "soybean",
+                        "spinach",
+                        "strawberry",
+                        "sweet_potato",
+                        "tomato",
+                        "vegetables",
+                        "wheat",
+                        "white_potato",
                         "lamp"
                     ]
                 }
@@ -6926,9 +6945,6 @@
             "par_baseline": {
                 "value": 1,
                 "unit": "mol/m2-hr"
-            },
-            "custom_function": {
-                "value": "b2_sun"
             }
         },
         "flows": {

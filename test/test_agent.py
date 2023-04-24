@@ -379,6 +379,7 @@ class TestAgentIncrement:
         assert receipt == {'test_currency_1': -0.5, 'test_currency_2': -0.5}
         assert test_agent.storage['test_currency_1'] == 0
         assert test_agent.storage['test_currency_2'] == 0
+        # TODO: Test with amount>1, confirm capacity scales with amount
 
 @pytest.fixture
 def get_flow_value_kwargs(kwargs):

@@ -136,15 +136,23 @@ def sample_sigmoid(rate, min_value=0, max_value=1, steepness=1, center=0.5):
     shifted = scaled + min_value
     return shifted
 
+def sample_switch(rate, min_value=0, max_value=1, center=0.5, duration=0.5):
+    """return the switch value"""
+    if rate > center - duration / 2 and rate < center + duration / 2:
+        return max_value
+    return min_value
+
 def evaluate_growth(agent, mode, params):
     if mode == 'daily':
         rate = agent.model.time.hour / 24
     elif mode == 'lifetime':
         rate = agent.attributes['age'] / agent.properties['lifetime']['value']
+        print(agent.attributes['age'], agent.properties['lifetime']['value'], rate)
     growth_func = {
         'norm': sample_norm,
         'sigmoid': sample_sigmoid,
         'clipped': sample_clipped_norm,
+        'switch': sample_switch
     }[params['type']]
     return growth_func(rate, **{k: v for k, v in params.items() if k != 'type'})
 
