@@ -41,7 +41,13 @@ def update_desc(agent_type, desc):
                 f['criteria']['path'] = '_'.join(path)
             newDirection = direction[:-3]
             f = {k: v for k, v in f.items() if k != 'required'}  # No longer used
+            
+            # Special cases
+            if 'lamp' in agent_type and currency == 'par':
+                f['connections'] = [agent_type]
+            
             new_desc['flows'][newDirection][currency] = f
+
     for char in desc['data']['characteristics']:
         char_type = char['type']
         if char_type.startswith('capacity'):
@@ -49,8 +55,14 @@ def update_desc(agent_type, desc):
             new_desc['capacity'][currency] = char['value']
         elif char_type.startswith('threshold'):
             _, limit, currency = char_type.split('_', 2)
+            path = f'in_{currency}_ratio'
+
+            # Special cases
+            if 'human' in agent_type and currency == 'co2':
+                path = f'out_{currency}_ratio'
+
             new_desc['thresholds'][currency] = {
-                'path': f'in_{currency}_ratio',
+                'path': path,
                 'limit': '>' if limit == 'upper' else '<',
                 'value': char['value'],
                 'connections': 'all',  # Require every connection to evaluate true
@@ -64,10 +76,12 @@ def update_desc(agent_type, desc):
 
 # MAKE NEW DATA FILES
 new_agent_desc = {}
+rename_agents = {'human_agent': 'human'}
 for agent_class, agents in default_agent_desc.items():
     for agent_type, desc in agents.items():
-        new_agent_desc[agent_type] = update_desc(agent_type, desc)
-        new_agent_desc[agent_type]['agent_class'] = agent_class
+        new_name = rename_agents.get(agent_type, agent_type)
+        new_agent_desc[new_name] = update_desc(agent_type, desc)
+        new_agent_desc[new_name]['agent_class'] = agent_class
 
 # SAVE NEW DATA FILES
 with open('data_files/agent_desc.json', 'w') as f:
@@ -82,7 +96,6 @@ config_names = [
     '1hrad',
     '4h',
     '4hg',
-    'b2_base',
     'b2_mission1a',
     'b2_mission1b',
     'b2_mission2',
@@ -90,6 +103,7 @@ config_names = [
 currencies = get_default_currency_data()
 for config_name in config_names:
     config = load_data_file(f'config_{config_name}.json', data_files)
+    config = config['config']  
     reformatted_config = {'agents': {}}
     allowed_kwargs = {'agents', 'currencies', 'termination', 'location',
                       'priorities', 'start_time', 'elapsed_time', 'step_num', 
@@ -126,6 +140,12 @@ for config_name in config_names:
                     reformatted_agent['storage'][field] = value
                 else:
                     raise ValueError(f'Unknown field in agent data: {field}: {value}')
+            # Updated lamp system
+            if '_lamp' in agent:
+                reformatted_agent['prototypes'] = ['lamp']
+            elif f'{agent}_lamp' in v:
+                reformatted_agent['flows'] = {'in': {'par': {'connections': [f'{agent}_lamp']}}}
+
             new_name = rename_agents.get(agent, agent)
             reformatted_config['agents'][new_name] = reformatted_agent
     with open(f'data_files/config_{config_name}.json', 'w') as f:

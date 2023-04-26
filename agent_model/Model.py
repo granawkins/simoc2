@@ -2,8 +2,8 @@ import random
 from copy import deepcopy
 import datetime
 import numpy as np
-from .util import get_default_currency_data, get_default_agent_data, merge_json, recursively_clear_lists
-from .Agent import Agent
+from .util import get_default_currency_data, load_data_file, merge_json, recursively_clear_lists
+from .Agent import Agent, PlantAgent, LampAgent, SunAgent, AtmosphereEqualizerAgent
 
 DEFAULT_START_TIME = '1991-01-01T00:00:00'
 DEFAULT_TIME_UNIT = 'hours'
@@ -79,20 +79,41 @@ class Model:
             return pruned
 
         # Merge user agents with default agents
+        default_agent_desc = load_data_file('agent_desc.json')
         for agent_id, agent_data in agents.items():
-            # TODO: Add a 'prototype' arg to specify default agent other than agent_id
-            default_agent_data = get_default_agent_data(agent_id)
-            if default_agent_data is not None:
-                # Merge user agent data with default agent data, if available
-                agent_data = merge_json(default_agent_data, deepcopy(agent_data))
+
+            # Load default agent data and/or prototypes
+            prototypes = agent_data.pop('prototypes', [])
+            if agent_id in default_agent_desc:
+                prototypes.append(agent_id)
+            while len(prototypes) > 0:
+                [prototype, *prototypes] = prototypes
+                if prototype not in default_agent_desc:
+                    raise ValueError(f'Agent prototype not found ({prototype})')
+                agent_data = merge_json(default_agent_desc[prototype], deepcopy(agent_data))
+                if 'prototypes' in agent_data:
+                    prototypes += agent_data.pop('prototypes')
             agent_data['agent_id'] = agent_id
+
             # Replace generic connections
             if 'flows' in agent_data:
                 for flows in agent_data['flows'].values():
                     for flow_data in flows.values():
                         flow_data['connections'] = replace_generic_connections(flow_data['connections'])
-            # TODO: Select agent class based on agent_data
-            agent = Agent(model, **agent_data)
+
+            # Determine agent class. TODO: Remove hard-coding somehow?
+            if 'agent_class' in agent_data and agent_data['agent_class'] == 'plants':
+                build_from_class  = PlantAgent
+            elif 'lamp' in agent_id:
+                build_from_class = LampAgent
+            elif 'sun' in agent_id:
+                build_from_class = SunAgent
+            elif 'atmosphere_equalizer' in agent_id:
+                build_from_class = AtmosphereEqualizerAgent
+            else:
+                build_from_class = Agent
+
+            agent = build_from_class(model, **agent_data)
             model.add_agent(agent_id, agent)
 
         # Merge user currencies with default currencies

@@ -110,17 +110,25 @@ def pdf(_x, std, cache={}):
         cache[(_x, std)] = numerator / denominator
     return cache[(_x, std)]
 
-def sample_norm(rate, min_value=0, max_value=1, std=math.pi/10, center=0.5):
+def pdf_mean(std, center, n_samples, cache={}):
+    """Calculate the mean y-value of the pdf"""
+    if (std, center) not in cache:
+        x_vals = [i/n_samples for i in range(n_samples)]
+        y_vals = [pdf((x - center) / std, std) for x in x_vals]
+        cache[(std, center)] = sum(y_vals) / n_samples
+    return cache[(std, center)]
+
+def sample_norm(rate, std=math.pi/10, center=0.5, n_samples=100):
     """return the normalized sigmoid value"""
+    if any(v < 0 or v > 1 for v in (rate, std, center)):
+        raise ValueError('rate, std, and center must be between 0 and 1.')
     # Shift x-value to center at 0
     x = (rate - center) / std
+    # Calculate y-value
     y = pdf(x, std)
-    # Shift y-value to min/max range
-    norm_factor = pdf(0, std)  # First, set max=1
-    normalized = y / norm_factor
-    scaled = normalized * (max_value - min_value)
-    shifted = scaled + min_value
-    return shifted
+    # Normalize y-value to mean of 1
+    y_mean = pdf_mean(std, center, n_samples)
+    return y / y_mean
 
 def sample_clipped_norm(rate, factor=2, **kwargs):
     """return the clipped normalized sigmoid value"""
@@ -147,7 +155,6 @@ def evaluate_growth(agent, mode, params):
         rate = agent.model.time.hour / 24
     elif mode == 'lifetime':
         rate = agent.attributes['age'] / agent.properties['lifetime']['value']
-        print(agent.attributes['age'], agent.properties['lifetime']['value'], rate)
     growth_func = {
         'norm': sample_norm,
         'sigmoid': sample_sigmoid,

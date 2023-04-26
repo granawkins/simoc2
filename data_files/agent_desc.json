@@ -1,5 +1,5 @@
 {
-    "human_agent": {
+    "human": {
         "amount": 1,
         "storage": {},
         "properties": {
@@ -119,7 +119,7 @@
                 "connections": "all"
             },
             "co2": {
-                "path": "in_co2_ratio",
+                "path": "out_co2_ratio",
                 "limit": ">",
                 "value": 0.01,
                 "connections": "all"
@@ -926,7 +926,7 @@
             "harvest_index": {
                 "value": 0.3
             },
-            "'reproduce'": {
+            "reproduce": {
                 "value": true
             },
             "density_factor": {
@@ -6899,32 +6899,6 @@
                         "daily_growth_factor"
                     ],
                     "connections": [
-                        "cabbage",
-                        "carrot",
-                        "celery",
-                        "chard",
-                        "corn",
-                        "dry_bean",
-                        "green_onion",
-                        "lettuce",
-                        "onion",
-                        "orchard",
-                        "pea",
-                        "peanut",
-                        "pepper",
-                        "radish",
-                        "red_beet",
-                        "rice",
-                        "snap_bean",
-                        "sorghum",
-                        "soybean",
-                        "spinach",
-                        "strawberry",
-                        "sweet_potato",
-                        "tomato",
-                        "vegetables",
-                        "wheat",
-                        "white_potato",
                         "lamp"
                     ]
                 }

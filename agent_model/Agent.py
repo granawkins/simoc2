@@ -1,6 +1,9 @@
 import math
 from copy import deepcopy
+from collections import defaultdict
+
 import numpy as np
+
 from .util import evaluate_reference, evaluate_growth, recursively_clear_lists
 
 class Agent:
@@ -228,8 +231,8 @@ class Agent:
         weighted = flow.get('weighted')
         if step_value > 0 and weighted:
             for field in weighted:
-                if field in self.storage:  # e.g. Biomass
-                    weight = self.storage[field] / self.active
+                if field in self.capacity:  # e.g. Biomass
+                    weight = self.view(field)[field] / self.active
                 elif field in self.properties:  # e.g. 'mass'
                     weight = self.properties[field]['value']
                 elif field in self.attributes:  # e.g. 'te_factor'
@@ -391,12 +394,12 @@ class PlantAgent(Agent):
 
     def get_flow_value(self, dT, direction, currency, flow, influx):
         is_grown = self.attributes['grown']
-        step_value = super().get_flow_value(dT, direction, currency, flow, influx)
-        if 'criteria' in flow and flow['criteria']['path'] == 'grown':
-            return 0. if not is_grown else step_value
-        else:
-            return step_value if not is_grown else 0.
-    
+        on_grown = ('criteria' in flow and flow['criteria']['path'] == 'grown')
+        if ((is_grown and not on_grown) or 
+            (not is_grown and on_grown)):
+            return 0.
+        return super().get_flow_value(dT, direction, currency, flow, influx)
+        
     def _calculate_co2_response(self):
         if self.model._co2_response_cache['step_num'] != self.model.step_num:
             ref_agent_name = self.flows['in']['co2']['connections'][0]
@@ -442,16 +445,7 @@ class PlantAgent(Agent):
             if self.attributes['delay_start'] <= 0:
                 self.active = self.amount
             return
-        # Rproduction
-        if self.attributes['grown']:
-            if ('reproduce' not in self.properties or 
-                not self.properties['reproduce']['value']):
-                self.kill(f'{self.agent_id} reached end of life')
-            else:
-                self.active = self.amount
-                self.attributes = {**self.attributes, 
-                                   **self.default_attributes, 
-                                   'age': 0}
+        # Grown
         if self.attributes['age'] >= self.properties['lifetime']['value']:
             self.attributes['grown'] = True
         
@@ -488,6 +482,18 @@ class PlantAgent(Agent):
 
         super().step(dT)
 
+        # Rproduction
+        if self.attributes['grown']:
+            self.storage['biomass'] = 0
+            if ('reproduce' not in self.properties or 
+                not self.properties['reproduce']['value']):
+                self.kill(f'{self.agent_id} reached end of life')
+            else:
+                self.active = self.amount
+                self.attributes = {**self.attributes, 
+                                   **self.default_attributes, 
+                                   'age': 0}
+
     def kill(self, reason, n_dead=None):
         # Convert dead biomass to inedible biomass
         if n_dead is None:
@@ -502,11 +508,18 @@ class PlantAgent(Agent):
 class LampAgent(Agent):
     default_attributes = {
         'daily_growth_factor': 1,
+        'par_rate': 1,
+        'photoperiod': 12,
     }
-    def __init__(self, *args, attributes=None, **kwargs):
+    default_capacity = {
+        'par': 5,
+    }
+    def __init__(self, *args, attributes=None, capacity=None, **kwargs):
         attributes = {} if attributes is None else attributes
         attributes = {**self.default_attributes, **attributes}
-        super().__init__(*args, attributes=attributes, **kwargs)
+        capacity = {} if capacity is None else capacity
+        capacity = {**self.default_capacity, **capacity}
+        super().__init__(*args, attributes=attributes, capacity=capacity, **kwargs)
         # -- NON_SERIALIZED
         self.connected_plants = []
         self.daily_growth = []
@@ -514,42 +527,45 @@ class LampAgent(Agent):
 
     def _update_lamp_attributes(self):
         # Scale the number of lamps to the number of active plants
-        lamp_configuration = {p: p.active for p in self.connected_plants}
+        lamp_configuration = {p: self.model.agents[p].active 
+                              for p in self.connected_plants}
         if lamp_configuration == self.lamp_configuration:
             return
         self.lamp_configuration = lamp_configuration
         self.active = sum(lamp_configuration.values())
         # Set the photoperiod and par_rate to the max required by any plant
         steps_per_day = 24
-        photoperiod = self.attributes['photoperiod']
-        par_rate = self.attributes['par_rate']
-        for plant in self.connected_plants:
-            if plant.active:
-                photoperiod = max(photoperiod, plant.attributes['photoperiod'])
+        photoperiod = 0
+        par_rate = 0
+        for plant_id in self.connected_plants:
+            plant = self.model.agents[plant_id]
+            if plant.active > 0:
+                photoperiod = max(photoperiod, plant.properties['photoperiod']['value'])
                 par_baseline = plant.properties['par_baseline']['value']                
                 par_rate = max(par_rate, par_baseline * steps_per_day / photoperiod)
         self.attributes['photoperiod'] = photoperiod
         self.attributes['par_rate'] = par_rate
         # Update the daily growth
-        self.daily_growth = [0] * steps_per_day
         photo_start = (steps_per_day - photoperiod) // 2
         photo_end = photo_start + photoperiod
         self.daily_growth = np.zeros(steps_per_day)
         self.daily_growth[photo_start:photo_end] = par_rate
 
-    def register(self):
+    def register(self, record_initial_state=False):
         self.connected_plants = []
-        for agent in self.model.agents.values():
+        for agent_id, agent in self.model.agents.items():
             if ('par' in agent.flows['in'] and 
                 self.agent_id in agent.flows['in']['par']['connections']):
-                self.connected_plants.append(agent)
+                self.connected_plants.append(agent_id)
         if self.connected_plants:
             self._update_lamp_attributes()
         else:
             self.active = 0
-        super().register()
+        super().register(record_initial_state)
 
     def step(self, dT=1):
+        if not self.registered:
+            self.register()
         self.storage['par'] = 0
         self._update_lamp_attributes()
         hour_of_day = self.model.time.hour
@@ -560,6 +576,9 @@ class SunAgent(Agent):
     default_attributes = {
         'daily_growth_factor': 1,
         'monthly_growth_factor': 1,
+    }
+    default_capacity = {
+        'par': 5,
     }
     hourly_par_fraction = [  # Marino fig. 2a, mean par per hour/day, scaled to mean=1
         0.27330022, 0.06846029, 0.06631662, 0.06631662, 0.48421388, 0.54054486,
@@ -580,17 +599,44 @@ class SunAgent(Agent):
         0.92659387, 0.84716341, 0.81756864, 0.73746165, 0.59808571, 0.55165404,
     ]
 
-    def __init__(self, *args, attributes=None, **kwargs):
+    def __init__(self, *args, attributes=None, capacity=None, **kwargs):
         attributes = {} if attributes is None else attributes
         attributes = {**self.default_attributes, **attributes}
-        super().__init__(*args, attributes=attributes, **kwargs)
+        capacity = {} if capacity is None else capacity
+        capacity = {**self.default_capacity, **capacity}
+        super().__init__(*args, attributes=attributes, capacity=capacity, **kwargs)
 
     def step(self, dT=1):
+        if not self.registered:
+            self.register()
         self.storage['par'] = 0
         hour_of_day = self.model.time.hour
         self.attributes['daily_growth_factor'] = self.hourly_par_fraction[hour_of_day]
-        reference_year = min(1991, max(1995, self.model.time.year))
+        reference_year = max(1991, min(1995, self.model.time.year))
         reference_month = self.model.time.month - 1
         reference_i = (reference_year - 1991) * 12 + reference_month
         self.attributes['monthly_growth_factor'] = self.monthly_par[reference_i]
+        super().step(dT)
+
+class AtmosphereEqualizerAgent(Agent):
+    def step(self, dT=1):
+        atms = {a: self.model.agents[a] for a in self.flows['in']['atmosphere']['connections']}
+        volumes = {}  # agent_type: m3
+        current = {}  # agent_type: {atmo_currency: kg}
+        total_atm = defaultdict(float)  # atmo_currency: kg
+        for agent_id, agent in atms.items():
+            volumes[agent_id] = agent.properties['volume']['value'] * agent.amount
+            current[agent_id] = agent.view(view='atmosphere')
+            for currency, amount in current[agent_id].items():
+                total_atm[currency] += amount
+
+        total_volume = sum(volumes.values())
+        for agent_id, agent in atms.items():
+            atm_ratio = volumes[agent_id] / total_volume
+            targets = {k: v * atm_ratio for k, v in total_atm.items()}
+            deltas = {k: v - current[agent_id][k] for k, v in targets.items()}
+            for currency, delta in deltas.items():
+                if delta != 0:
+                    # TODO: Add these to flows records
+                    agent.increment(currency, delta)
         super().step(dT)

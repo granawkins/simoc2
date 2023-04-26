@@ -175,26 +175,22 @@ class TestGrowthFuncs:
 
     def test_growth_sample_norm(self):
         # Default: 0 < y < 1, x_center = 0.5
-        results = [sample_norm(x/10) for x in range(1, 10)]
-        assert max(results) == 1
+        n_samples = 100
+        results = [sample_norm(x/100, n_samples=n_samples) for x in range(1, n_samples)]
+        assert sum(results)/len(results) == pytest.approx(1, abs=0.02)
         # middle value should be highest, symmetrical either side
-        assert results[4] == max(results)
-        for i in range(4):
-            assert results[i] == pytest.approx(results[-i-1])
-
-        # Shift range
-        y_min, y_max = 1, 2.5
-        results = [sample_norm(x/10, y_min, y_max) for x in range(1, 10)]
-        assert max(results) == y_max
-        assert results[4] == max(results)
-        for i in range(4):
+        midpoint = n_samples//2-1
+        assert results[midpoint] == max(results)
+        for i in range(midpoint):
             assert results[i] == pytest.approx(results[-i-1])
 
         # Shift center
         x_center = 0.25
         results = [sample_norm(x/1000, center=x_center) for x in range(1000)]
-        assert max(results) == 1
+        assert sum(results)/len(results) == pytest.approx(1, abs=0.01)
         assert results[250] == max(results)
+
+        # TODO: Shift stdev
 
     def test_growth_sample_clippped_norm(self):
         results = [sample_clipped_norm(x/10) for x in range(1, 10)]
@@ -230,11 +226,14 @@ class TestEvaluateGrowth:
     def test_evaluate_growth_daily(self, mock_agent):
         mode = 'daily'
         params = {'type': 'norm'}
+        daily_vals = []
+        for hour in range(24):
+            mock_agent.model.time = datetime.datetime(2019, 1, 1, hour)
+            daily_vals.append(evaluate_growth(mock_agent, mode, params))
         # Max growth (1) at noon
-        assert evaluate_growth(mock_agent, mode, params) == 1.0
+        assert daily_vals[12] == max(daily_vals)
         # Min growth (nearly 0) at midnight
-        mock_agent.model.time = datetime.datetime(2019, 1, 1, 0)
-        assert 0 < evaluate_growth(mock_agent, mode, params) < 0.0001
+        assert daily_vals[0] == min(daily_vals)
 
     def test_evaluate_growth_lifetime(self, mock_agent):
         mode = 'lifetime'

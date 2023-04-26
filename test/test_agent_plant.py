@@ -291,19 +291,22 @@ class TestAgentPlantStep:
         ns_agent = wheat_model.agents['nutrient_storage']
         fs_agent = wheat_model.agents['food_storage']
         lifetime = wheat_agent.properties['lifetime']['value']
+        expected_lifetime_biomass = lifetime * wheat_agent.flows['out']['biomass']['value']
         for _ in range(lifetime):
             wheat_model.step()
         assert wheat_agent.attributes['age'] == lifetime
-        assert wheat_agent.storage['biomass'] > 0
+        assert wheat_agent.storage['biomass'] == pytest.approx(expected_lifetime_biomass)
         assert 'inedible_biomass' not in ns_agent.storage
         assert 'wheat' not in fs_agent.storage
 
         wheat_model.step()
-        wheat_model.step()
-        assert wheat_agent.attributes['age'] == 1
+        assert wheat_agent.attributes['age'] == 0
         assert wheat_agent.storage['biomass'] == 0
-        assert ns_agent.storage['inedible_biomass'] > 0
-        assert fs_agent.storage['wheat'] > 0        
+        harvest_index = wheat_agent.properties['harvest_index']['value']
+        expected_wheat = pytest.approx(expected_lifetime_biomass * harvest_index)        
+        expected_inedib = pytest.approx(expected_lifetime_biomass * (1 - harvest_index))
+        assert fs_agent.storage['wheat'] == expected_wheat
+        assert ns_agent.storage['inedible_biomass'] == expected_inedib
 
     def test_agent_plant_step(self):
         """
