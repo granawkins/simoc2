@@ -87,7 +87,7 @@ class MockAgent:
             return deepcopy(self.storage)
 
 class MockModel:
-    floating_point_accuracy = 6
+    floating_point_precision = 6
     agents = {}
     currencies = {
         'test_currency_1': {

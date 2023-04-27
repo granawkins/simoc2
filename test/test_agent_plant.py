@@ -26,7 +26,7 @@ def wheat_kwargs():
 @pytest.fixture
 def mock_model():
     class MockModel:
-        floating_point_accuracy = 6
+        floating_point_precision = 6
         agents = {}
         time = datetime.datetime(2020, 1, 1)
         currencies = get_default_currency_data()

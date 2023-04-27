@@ -143,6 +143,7 @@ for config_name in config_names:
             # Updated lamp system
             if '_lamp' in agent:
                 reformatted_agent['prototypes'] = ['lamp']
+                reformatted_agent['flows'] = {'out': {'par': {'connections': [agent]}}}
             elif f'{agent}_lamp' in v:
                 reformatted_agent['flows'] = {'in': {'par': {'connections': [f'{agent}_lamp']}}}
 

@@ -8,13 +8,13 @@ from .Agent import Agent, PlantAgent, LampAgent, SunAgent, AtmosphereEqualizerAg
 DEFAULT_START_TIME = '1991-01-01T00:00:00'
 DEFAULT_TIME_UNIT = 'hours'
 DEFAULT_LOCATION = 'earth'
-FLOATING_POINT_ACCURACY = 6
+FLOATING_POINT_PRECISION = 6
 DEFAULT_PRIORITIES = ["structures", "storage", "power_generation", "inhabitants",
                       "eclss", "plants"]
 
 class Model:
     
-    floating_point_accuracy = FLOATING_POINT_ACCURACY
+    floating_point_precision = FLOATING_POINT_PRECISION
     time_unit = DEFAULT_TIME_UNIT
 
     def __init__(self, termination=None, location=None, priorities=None, 
@@ -61,7 +61,7 @@ class Model:
         self.registered = True
 
     @classmethod
-    def from_config(cls, agents={}, currencies={}, **kwargs):
+    def from_config(cls, agents={}, currencies={}, record_initial_state=None, **kwargs):
         # Initialize an empty model
         model = cls(**kwargs)
 
@@ -80,6 +80,7 @@ class Model:
 
         # Merge user agents with default agents
         default_agent_desc = load_data_file('agent_desc.json')
+        currencies_in_use = set()
         for agent_id, agent_data in agents.items():
 
             # Load default agent data and/or prototypes
@@ -95,11 +96,16 @@ class Model:
                     prototypes += agent_data.pop('prototypes')
             agent_data['agent_id'] = agent_id
 
-            # Replace generic connections
             if 'flows' in agent_data:
                 for flows in agent_data['flows'].values():
-                    for flow_data in flows.values():
+                    for currency, flow_data in flows.items():
+                        # Record currencies in use
+                        currencies_in_use.add(currency)
+                        # Replace generic connections
                         flow_data['connections'] = replace_generic_connections(flow_data['connections'])
+            if 'storage' in agent_data:
+                for currency in agent_data['storage'].keys():
+                    currencies_in_use.add(currency)
 
             # Determine agent class. TODO: Remove hard-coding somehow?
             if 'agent_class' in agent_data and agent_data['agent_class'] == 'plants':
@@ -119,10 +125,14 @@ class Model:
         # Merge user currencies with default currencies
         currencies = {**get_default_currency_data(), **currencies}
         for currency_id, currency_data in currencies.items():
-            # TODO: Only add currencies which are used by agents
-            model.add_currency(currency_id, currency_data)
+            # Only add currencies and currency classes with active flows
+            if (currency_id in currencies_in_use or 
+                (currency_data.get('currency_type') == 'class' and 
+                any(c in currencies_in_use for c in currency_data['currencies']))):
+                model.add_currency(currency_id, currency_data)
 
-        record_initial_state = model.step_num == 0
+        if record_initial_state is None:
+            record_initial_state = model.step_num == 0
         model.register(record_initial_state)
         return model
 

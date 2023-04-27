@@ -165,12 +165,11 @@ class TestModel:
     
     def test_model_from_config(self, model_kwargs):
         agents = {'o2_storage': {'description': 'test_description'},
-                  'test_agent': {}}
+                  'test_agent': {'capacity': {'test_currency': 0}, 'storage': {'test_currency': 0}}}
         currencies = {'test_currency': {'description': 'test_description'}}
         model = Model.from_config(agents, currencies, **model_kwargs)
         assert list(model.agents.keys()) == ['o2_storage', 'test_agent']
         assert 'test_currency' in model.currencies
-        assert 'o2' in model.currencies
         assert model.registered
         assert len(model.records['time']) == 1
         

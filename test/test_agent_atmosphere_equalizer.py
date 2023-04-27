@@ -30,9 +30,10 @@ def mock_model():
 
 class TestAgentAtmosphereEqualizer:
     def test_agent_atmosphere_equalizer_step(self, mock_model):
+        conns = ['test_agent_1', 'test_agent_2']
         kwargs = {'agent_id': 'atmosphere_equalizer',
-                  'flows': {'in': {'atmosphere': {
-                  'connections': ['test_agent_1', 'test_agent_2']}}}}
+                  'flows': {'in': {'atmosphere': {'connections': conns}},
+                            'out': {'atmosphere': {'connections': conns}}}}
         agent = AtmosphereEqualizerAgent(mock_model, **kwargs)
         agent.step()
         test_agent_1 = mock_model.agents['test_agent_1']

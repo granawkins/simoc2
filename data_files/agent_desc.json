@@ -338,6 +338,9 @@
                 },
                 "kwh": {
                     "value": 0.012,
+                    "requires": [
+                        "treated"
+                    ],
                     "flow_rate": {
                         "unit": "kWh",
                         "time": "hour"
@@ -488,12 +491,6 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": {
-                        "limit": ">",
-                        "value": 0.001,
-                        "buffer": 2,
-                        "path": "in_co2_ratio"
-                    },
                     "connections": [
                         "habitat"
                     ]
@@ -599,7 +596,8 @@
                 "co2": {
                     "value": 0.085,
                     "requires": [
-                        "co2"
+                        "co2",
+                        "kwh"
                     ],
                     "flow_rate": {
                         "unit": "kg",

@@ -97,8 +97,8 @@ def evaluate_reference(agent, reference):
         target = 0 if not total else ref_agent.storage[currency] / total
     # Evaluate
     return operator_dict[limit](
-        round(target, agent.model.floating_point_accuracy),
-        round(value, agent.model.floating_point_accuracy))
+        round(target, agent.model.floating_point_precision),
+        round(value, agent.model.floating_point_precision))
 
 # GROWTH FUNCTIONS
 
@@ -133,8 +133,10 @@ def sample_norm(rate, std=math.pi/10, center=0.5, n_samples=100):
 def sample_clipped_norm(rate, factor=2, **kwargs):
     """return the clipped normalized sigmoid value"""
     norm_value = sample_norm(rate, **kwargs)
+    center = kwargs.get('center', 0.5)
+    y_max = sample_norm(center, **kwargs)
     norm_value *= factor
-    return min(max(norm_value, 0), factor)
+    return min(norm_value, y_max)
 
 def sample_sigmoid(rate, min_value=0, max_value=1, steepness=1, center=0.5):
     """return the sigmoid value"""

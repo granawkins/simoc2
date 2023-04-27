@@ -92,7 +92,7 @@ class TestAgentInit:
 @pytest.fixture
 def mock_model():
     class MockModel:
-        floating_point_accuracy = 6
+        floating_point_precision = 6
         agents = {}
         time = datetime.datetime(2020, 1, 1)
         currencies = {'test_currency': {'currency_type': 'currency'}}
@@ -661,12 +661,12 @@ class TestAgentStep:
         test_agent.register()
         test_structure.register()
         test_agent.step()
-        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [-1]
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [1]
         assert test_agent.records['flows']['out']['test_currency_2']['test_structure'] == [1]
         assert test_structure.storage['test_currency_1'] == 4
         assert test_structure.storage['test_currency_2'] == 6
         test_agent.step(dT=0.5)
-        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [-1, -0.5]
+        assert test_agent.records['flows']['in']['test_currency_1']['test_structure'] == [1, 0.5]
         assert test_agent.records['flows']['out']['test_currency_2']['test_structure'] == [1, 0.5]
         assert test_structure.storage['test_currency_1'] == 3.5
         assert test_structure.storage['test_currency_2'] == 6.5
@@ -708,7 +708,7 @@ class TestAgentStep:
         # If available, use first connection
         test_agent.step()
         assert test_agent.records['flows']['in']['test_currency_1'] == {
-            'test_structure_1': [-2],
+            'test_structure_1': [2],
             'test_structure_2': [0],
         }
         assert test_structure_1.storage['test_currency_1'] == 3
@@ -719,8 +719,8 @@ class TestAgentStep:
         test_agent.step()
         test_agent.step()
         assert test_agent.records['flows']['in']['test_currency_1'] == {
-            'test_structure_1': [-2, -1, 0],
-            'test_structure_2': [0, -1, -2],
+            'test_structure_1': [2, 1, 0],
+            'test_structure_2': [0, 1, 2],
         }
         assert test_structure_1.storage['test_currency_1'] == 0
         assert test_structure_2.storage['test_currency_1'] == 2

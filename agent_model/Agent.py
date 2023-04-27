@@ -70,13 +70,16 @@ class Agent:
                 raise ValueError(f'Agent {self.agent_id} has more storage '
                                  f'for {currency} than capacity.')
         # Initialize flow attributes and records, check connections
-        flow_records = {'in': {}, 'out': {}}
+        flow_records = {'in': defaultdict(dict), 'out': defaultdict(dict)}
         for direction, flows in self.flows.items():
             for currency, flow in flows.items():
                 self.register_flow(direction, currency, flow)
-                record = {c: [] if not record_initial_state else [0]
-                          for c in flow['connections']}
-                flow_records[direction][currency] = record
+                for conn in flow['connections']:
+                    agent = self.model.agents[conn]
+                    for _currency in agent.view(currency):
+                        record = [] if not record_initial_state else [0]
+                        flow_records[direction][_currency][conn] = record
+
         # Initialize records skeleton
         self.records = {
             'active': [] if not record_initial_state else [self.active],
@@ -135,9 +138,9 @@ class Agent:
             return {view: self.storage[view]}
         elif currency_type == 'class':
             class_currencies = self.model.currencies[view]['currencies']
-            return {currency: self.storage[currency]
+            return {currency: self.storage.get(currency, 0)
                     for currency in class_currencies
-                    if currency in self.storage}
+                    if currency in self.capacity}
         
     def serialize(self):
         """Return json-serializable dict of agent attributes"""
@@ -170,18 +173,20 @@ class Agent:
     # ------------- UPDATE ------------- #
     def increment(self, currency, value):
         """Increment currency in storage as available, return actual receipt"""
-        if value == 0:
-            return {currency: 0}
+        if value == 0:  # If currency_class, return dict of currencies
+            available = self.view(currency)
+            return {k: 0 for k in available.keys()}
         elif value < 0:  # Can be currency or currency_class
             available = self.view(currency)
             total_available = sum(available.values())
             if total_available == 0:
-                return {currency: 0}
+                return available
             actual = -min(-value, total_available)
             increment = {currency: actual * stored/total_available
                          for currency, stored in available.items()}
-            for currency, amount in increment.items():
-                self.storage[currency] += amount
+            for _currency, amount in increment.items():
+                if amount != 0:
+                    self.storage[_currency] += amount
             return increment
         elif value > 0:  # Can only be currency
             if self.model.currencies[currency]['currency_type'] != 'currency':
@@ -245,7 +250,8 @@ class Agent:
     
     def process_flow(self, dT, direction, currency, flow, influx, target, actual):
         """Update flow state post-exchange. Overloadable by subclasses."""
-        available_ratio = 1 if target == 0 else actual/target
+        available_ratio = round(0 if target == 0 else actual/target, 
+                                self.model.floating_point_precision)
         if direction == 'in':
             influx[currency] = available_ratio
         if 'deprive' in flow:
@@ -286,17 +292,17 @@ class Agent:
                 # Process Flow
                 remaining = float(target)
                 for connection in flow['connections']:
+                    agent = self.model.agents[connection]
                     if remaining > 0:
-                        agent = self.model.agents[connection]
                         multiplier = {'in': -1, 'out': 1}[direction]
                         exchange = agent.increment(currency, multiplier * remaining)
                         exchange_value = sum(exchange.values())
                         remaining -= abs(exchange_value)
                     else:
-                        exchange_value = 0
-
-                    # NOTE: This should be called regardless of whether the agent is active
-                    self.records['flows'][direction][currency][connection].append(exchange_value)
+                        exchange = {k: 0 for k in agent.view(currency).keys()}
+                    # NOTE: This must be called regardless of whether the agent is active
+                    for _currency, _value in exchange.items():
+                        self.records['flows'][direction][_currency][connection].append(abs(_value))
                 actual = target - remaining
                 # TODO: Handle excess outputs; currently ignored
 
@@ -472,9 +478,12 @@ class PlantAgent(Agent):
         self.attributes['par_factor'] = (0 if par_ideal == 0 
                                          else min(1, par_available / par_ideal))
         # Growth Rate: *2, because expected to sigmoid so max=2 -> mean=1
-        stored_biomass = sum(self.view('biomass').values())
-        fraction_of_max = stored_biomass / self.max_growth
-        self.attributes['growth_rate'] = fraction_of_max * 2
+        if self.active == 0:
+            self.attributes['growth_rate'] = 0
+        else:
+            stored_biomass = sum(self.view('biomass').values())
+            fraction_of_max = stored_biomass / self.active / self.max_growth
+            self.attributes['growth_rate'] = fraction_of_max * 2
         # CO2 response
         cu_factor, te_factor = self._calculate_co2_response()
         self.attributes['cu_factor'] = cu_factor
@@ -498,8 +507,9 @@ class PlantAgent(Agent):
         # Convert dead biomass to inedible biomass
         if n_dead is None:
             n_dead = self.active
-        dead_biomass = self.storage['biomass'] * n_dead / self.active
-        self.storage['biomass'] -= dead_biomass
+        dead_biomass = self.view('biomass')['biomass'] * n_dead / self.active
+        if dead_biomass:
+            self.storage['biomass'] -= dead_biomass
         ined_bio_str_agent = self.flows['out']['inedible_biomass']['connections'][0]
         ined_bio_str_agent = self.model.agents[ined_bio_str_agent]
         ined_bio_str_agent.increment('inedible_biomass', dead_biomass)
@@ -619,19 +629,34 @@ class SunAgent(Agent):
         super().step(dT)
 
 class AtmosphereEqualizerAgent(Agent):
+    def __init__(self, *args, **kwargs):
+        # -- NON_SERIALIZED
+        self.atms = {}
+        super().__init__(*args, **kwargs)
+
+    def register(self, record_initial_state=True):
+        self.atms = {a: self.model.agents[a] for a in self.flows['in']['atmosphere']['connections']}
+        for agent_id in self.atms.keys():
+            for direction in ('in', 'out'):
+                conns = self.flows[direction]['atmosphere']['connections']
+                if agent_id not in conns:
+                    conns.append(agent_id)
+        super().register(record_initial_state)
+
     def step(self, dT=1):
-        atms = {a: self.model.agents[a] for a in self.flows['in']['atmosphere']['connections']}
+        if not self.registered:
+            self.register()
         volumes = {}  # agent_type: m3
         current = {}  # agent_type: {atmo_currency: kg}
         total_atm = defaultdict(float)  # atmo_currency: kg
-        for agent_id, agent in atms.items():
+        for agent_id, agent in self.atms.items():
             volumes[agent_id] = agent.properties['volume']['value'] * agent.amount
             current[agent_id] = agent.view(view='atmosphere')
             for currency, amount in current[agent_id].items():
                 total_atm[currency] += amount
 
         total_volume = sum(volumes.values())
-        for agent_id, agent in atms.items():
+        for agent_id, agent in self.atms.items():
             atm_ratio = volumes[agent_id] / total_volume
             targets = {k: v * atm_ratio for k, v in total_atm.items()}
             deltas = {k: v - current[agent_id][k] for k, v in targets.items()}
@@ -639,4 +664,8 @@ class AtmosphereEqualizerAgent(Agent):
                 if delta != 0:
                     # TODO: Add these to flows records
                     agent.increment(currency, delta)
-        super().step(dT)
+                inflow = abs(max(0, delta))
+                outflow = abs(min(0, delta))
+                self.records['flows']['in'][currency][agent_id].append(inflow)
+                self.records['flows']['out'][currency][agent_id].append(outflow)
+        # super().step(dT)
