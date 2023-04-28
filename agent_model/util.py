@@ -59,8 +59,11 @@ def recursively_clear_lists(r):
         return []
 
 # LIMIT FUNCTIONS (THRESHOLD AND CRITERIA)
-
-operator_dict = {'>': operator.gt, '<': operator.lt, '=': operator.eq}
+operator_dict = {
+    '>': operator.gt, '<': operator.lt, 
+    '>=': operator.ge, '<=': operator.le,
+    '=': operator.eq, '!=': operator.ne,
+}
 def evaluate_reference(agent, reference):
     """Evaluate a reference dict and return a boolean
 

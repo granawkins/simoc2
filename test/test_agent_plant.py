@@ -164,7 +164,7 @@ class TestAgentPlant:
                 if currency == 'par': 
                     continue  # Dummy flow
                 flow_value = wheat_plant.get_flow_value(1, direction, currency, flow, influx)
-                if ('criteria' in flow and flow['criteria']['path'] == 'grown'):
+                if ('criteria' in flow and flow['criteria'][0]['path'] == 'grown'):
                     assert flow_value == 0, f'Flow value for {currency} should be 0'
                 else:
                     assert flow_value > 0, f'Flow value for {currency} should be > 0'
@@ -178,7 +178,7 @@ class TestAgentPlant:
                 if currency == 'par': 
                     continue  # Dummy flow
                 flow_value = wheat_plant.get_flow_value(1, direction, currency, flow, influx)
-                if ('criteria' in flow and flow['criteria']['path'] == 'grown'):
+                if ('criteria' in flow and flow['criteria'][0]['path'] == 'grown'):
                     assert flow_value > 0, f'Flow value for {currency} should be > 0'
                 else:
                     assert flow_value == 0, f'Flow value for {currency} should be 0'

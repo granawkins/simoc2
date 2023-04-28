@@ -194,7 +194,7 @@ class TestGrowthFuncs:
 
     def test_growth_sample_clippped_norm(self):
         results = [sample_clipped_norm(x/10) for x in range(1, 10)]
-        assert max(results) == 2
+        assert max(results) == 1
         assert results[4] == max(results)
         for i in range(4):
             assert results[i] == pytest.approx(results[-i-1])

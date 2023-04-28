@@ -103,9 +103,11 @@ class Agent:
             if field not in allowed_fields:
                 raise ValueError(f'Flow field {field} not allowed')
         # Initialize attributes
-        if 'criteria' in flow and 'buffer' in flow['criteria']:
-            buffer_attr = f'{direction}_{currency}_criteria_buffer'
-            self.attributes[buffer_attr] = flow['criteria']['buffer']
+        if 'criteria' in flow:
+            for i, criterion in enumerate(flow['criteria']):
+                if 'buffer' in criterion:
+                    buffer_attr = f'{direction}_{currency}_criteria_{i}_buffer'
+                    self.attributes[buffer_attr] = criterion['buffer']
         if 'deprive' in flow:
             deprive_attr = f'{direction}_{currency}_deprive'
             self.attributes[deprive_attr] = flow['deprive']['value']
@@ -217,15 +219,16 @@ class Agent:
                     step_value *= influx[_currency]  # Scale flows to requires
         criteria = flow.get('criteria')
         if step_value > 0 and criteria:
-            buffer_attr = f'{direction}_{currency}_criteria_buffer'
-            if evaluate_reference(self, criteria):
-                if 'buffer' in criteria and self.attributes[buffer_attr] > 0:
-                    self.attributes[buffer_attr] -= dT
+            for i, criterion in enumerate(criteria):
+                buffer_attr = f'{direction}_{currency}_criteria_{i}_buffer'
+                if evaluate_reference(self, criterion):
+                    if 'buffer' in criterion and self.attributes[buffer_attr] > 0:
+                        self.attributes[buffer_attr] -= dT
+                        step_value = 0
+                else:
                     step_value = 0
-            else:
-                step_value = 0
-                if 'buffer' in criteria and self.attributes[buffer_attr] == 0:
-                    self.attributes[buffer_attr] = criteria['buffer']
+                    if 'buffer' in criterion and self.attributes[buffer_attr] == 0:
+                        self.attributes[buffer_attr] = criterion['buffer']
         growth = flow.get('growth')
         if step_value > 0 and growth:
             for mode, params in growth.items():
@@ -400,7 +403,8 @@ class PlantAgent(Agent):
 
     def get_flow_value(self, dT, direction, currency, flow, influx):
         is_grown = self.attributes['grown']
-        on_grown = ('criteria' in flow and flow['criteria']['path'] == 'grown')
+        on_grown = ('criteria' in flow and 
+                    any(c['path'] == 'grown' for c in flow['criteria']))
         if ((is_grown and not on_grown) or 
             (not is_grown and on_grown)):
             return 0.
