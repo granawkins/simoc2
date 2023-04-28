@@ -103,7 +103,7 @@ def evaluate_reference(agent, reference):
 # GROWTH FUNCTIONS
 
 def pdf(_x, std, cache={}):
-    """return Gaussian Probability Distribution"""
+    """Return y-value of normal distribution at x-value for mean=0"""
     if (_x, std) not in cache:
         numerator = math.exp(-1 * (_x ** 2) / (2 * (std ** 2)))
         denominator = math.sqrt(2 * math.pi) * std
@@ -119,7 +119,14 @@ def pdf_mean(std, center, n_samples, cache={}):
     return cache[(std, center)]
 
 def sample_norm(rate, std=math.pi/10, center=0.5, n_samples=100):
-    """return the normalized sigmoid value"""
+    """Return y-value of normal distribution at x-value, such mean(y) = 1
+    
+    Arguments:
+        rate: x-value to sample at
+        std: standard deviation of normal distribution
+        center: x-value to center the distribution at
+        n_samples: number of samples to use for mean calculation
+    """
     if any(v < 0 or v > 1 for v in (rate, std, center)):
         raise ValueError('rate, std, and center must be between 0 and 1.')
     # Shift x-value to center at 0
@@ -131,12 +138,21 @@ def sample_norm(rate, std=math.pi/10, center=0.5, n_samples=100):
     return y / y_mean
 
 def sample_clipped_norm(rate, factor=2, **kwargs):
-    """return the clipped normalized sigmoid value"""
-    norm_value = sample_norm(rate, **kwargs)
+    """Return y-value of normal distribution at x-value, clipped at center
+    
+    From sample_norm, multiply all values by factor, clip at original max,
+    then scale to max=1.
+
+    Arguments:
+        rate: x-value to sample at
+        factor: factor to multiply the normal distribution by
+    """
+    norm_value = sample_norm(rate, **kwargs)  # Get the norm value
     center = kwargs.get('center', 0.5)
-    y_max = sample_norm(center, **kwargs)
-    norm_value *= factor
-    return min(norm_value, y_max)
+    y_max = sample_norm(center, **kwargs)     # Get max value for that curve
+    norm_value *= factor                      # Scale value by factor
+    clip_value = min(norm_value, y_max)       # Clip at original max
+    return clip_value / y_max                 # Scale to max=1
 
 def sample_sigmoid(rate, min_value=0, max_value=1, steepness=1, center=0.5):
     """return the sigmoid value"""
