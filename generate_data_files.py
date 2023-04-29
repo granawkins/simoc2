@@ -28,7 +28,13 @@ def update_desc(agent_type, desc):
         for f in desc['data'][direction]:
             currency = f.pop('type')
             d1, d2 = ('to', 'from') if direction == 'input' else ('from', 'to')
-            conns = [c for c in default_agent_conn if c[d1] == f'{agent_type}.{currency}']
+            conn_types = [agent_type]
+            if 'habitat' in agent_type:
+                conn_types.append('habitat')
+            elif 'greenhouse' in agent_type:
+                conn_types.append('greenhouse')
+            conns = [c for c in default_agent_conn 
+                     if any(c[d1] == f'{a}.{currency}' for a in conn_types)]
             if len(conns) > 1:
                 if not any('priority' not in c for c in conns):
                     conns = sorted(conns, key=lambda c: c['priority'])
@@ -39,12 +45,17 @@ def update_desc(agent_type, desc):
                 if len(path) == 3:
                     path = [path[-1], *path[:-1]]
                 f['criteria']['path'] = '_'.join(path)
+                f['criteria'] = [f['criteria']]  # Change criteria to list of dicts
             newDirection = direction[:-3]
             f = {k: v for k, v in f.items() if k != 'required'}  # No longer used
             
             # Special cases
-            if 'lamp' in agent_type and currency == 'par':
-                f['connections'] = [agent_type]
+            if 'lamp' in agent_type:
+                if currency == 'par':
+                    f['connections'] = [agent_type]
+                if 'par_baseline' in f['weighted']:
+                    f['weighted'] = ['par_rate' if w == 'par_baseline' else w 
+                                     for w in f['weighted']]
             
             new_desc['flows'][newDirection][currency] = f
 
@@ -82,6 +93,61 @@ for agent_class, agents in default_agent_desc.items():
         new_name = rename_agents.get(agent_type, agent_type)
         new_agent_desc[new_name] = update_desc(agent_type, desc)
         new_agent_desc[new_name]['agent_class'] = agent_class
+
+# Manual changes to ECLSS components
+for dir, flows in new_agent_desc['multifiltration_purifier_post_treatment']['flows'].items():
+    if dir == 'in':
+        flows['treated']['criteria'] = [{
+            "limit": ">=",
+            "value": flows['treated']['value'],
+            "path": "in_treated",
+        }]
+        flows['kwh']['requires'] = ['treated']
+
+for currency, flow in new_agent_desc['co2_reduction_sabatier']['flows']['in'].items():
+    if currency == 'h2':
+        flow['criteria'].append({
+            "limit": ">=",
+            "value": flow['value'],
+            "path": "in_h2",
+        })
+    elif currency == 'co2':
+        del flow['criteria']  # Covered by weight
+    else:
+        flow['requires'].append('h2')
+
+new_agent_desc['co2_removal_SAWD']['flows']['out']['co2']['requires'].append('kwh')
+
+for dir, flows in new_agent_desc['solid_waste_aerobic_bioreactor']['flows'].items():
+    if dir == 'in':
+        flows['feces']['criteria'] = [{
+            "limit": ">=",
+            "value": flows['feces']['value'],
+            "path": "in_feces",
+        }]
+        o2 = flows.pop('o2')
+        flows['kwh']['requires'] = ['feces']
+        o2['requires'] = ['feces', 'kwh']
+        flows['o2'] = o2
+    if dir == 'out':
+        for f in flows.values():
+            f['requires'].append('kwh')
+
+for dir, flows in new_agent_desc['urine_recycling_processor_VCD']['flows'].items():
+    if dir == 'in':
+        flows['urine']['criteria'] = [{
+            "limit": ">=",
+            "value": flows['urine']['value'],
+            "path": "in_urine",
+        }]
+        flows['kwh']['requires'] = ['urine']
+    if dir == 'out':
+        for f in flows.values():
+            f['requires'].append('kwh')
+
+new_agent_desc['dehumidifier']['flows']['out']['treated']['requires'].append('kwh')
+
+
 
 # SAVE NEW DATA FILES
 with open('data_files/agent_desc.json', 'w') as f:

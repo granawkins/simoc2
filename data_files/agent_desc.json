@@ -7054,7 +7054,7 @@
                         "time": "hour"
                     },
                     "weighted": [
-                        "par_baseline",
+                        "par_rate",
                         "daily_growth_factor"
                     ],
                     "connections": [
@@ -7073,7 +7073,7 @@
                         "time": "hour"
                     },
                     "weighted": [
-                        "par_baseline",
+                        "par_rate",
                         "daily_growth_factor"
                     ],
                     "connections": [
