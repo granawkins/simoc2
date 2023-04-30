@@ -801,6 +801,11 @@
                             "limit": ">",
                             "value": 0.01,
                             "path": "in_h2o_ratio"
+                        },
+                        {
+                            "limit": ">=",
+                            "value": 4.0,
+                            "path": "in_h2o"
                         }
                     ],
                     "connections": [
@@ -827,7 +832,7 @@
                     "value": 4,
                     "requires": [
                         "h2o",
-                        "kwh"
+                        "h2o"
                     ],
                     "flow_rate": {
                         "unit": "kg",
@@ -7054,7 +7059,6 @@
                         "time": "hour"
                     },
                     "weighted": [
-                        "par_rate",
                         "daily_growth_factor"
                     ],
                     "connections": [
@@ -7073,7 +7077,6 @@
                         "time": "hour"
                     },
                     "weighted": [
-                        "par_rate",
                         "daily_growth_factor"
                     ],
                     "connections": [

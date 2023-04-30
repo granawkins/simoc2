@@ -91,7 +91,8 @@ class Model:
                 [prototype, *prototypes] = prototypes
                 if prototype not in default_agent_desc:
                     raise ValueError(f'Agent prototype not found ({prototype})')
-                agent_data = merge_json(default_agent_desc[prototype], deepcopy(agent_data))
+                agent_data = merge_json(deepcopy(default_agent_desc[prototype]), 
+                                        deepcopy(agent_data))
                 if 'prototypes' in agent_data:
                     prototypes += agent_data.pop('prototypes')
             agent_data['agent_id'] = agent_id

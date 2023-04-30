@@ -54,8 +54,7 @@ def update_desc(agent_type, desc):
                 if currency == 'par':
                     f['connections'] = [agent_type]
                 if 'par_baseline' in f['weighted']:
-                    f['weighted'] = ['par_rate' if w == 'par_baseline' else w 
-                                     for w in f['weighted']]
+                    f['weighted'] = [w for w in f['weighted'] if w != 'par_baseline']
             
             new_desc['flows'][newDirection][currency] = f
 
@@ -145,7 +144,15 @@ for dir, flows in new_agent_desc['urine_recycling_processor_VCD']['flows'].items
         for f in flows.values():
             f['requires'].append('kwh')
 
-new_agent_desc['dehumidifier']['flows']['out']['treated']['requires'].append('kwh')
+for dir, flows in new_agent_desc['dehumidifier']['flows'].items():
+    if dir == 'in':
+        flows['h2o']['criteria'].append({
+            "limit": ">=",
+            "value": flows['h2o']['value'],
+            "path": "in_h2o",
+        })
+    elif dir == 'out':
+        flows['treated']['requires'].append('h2o')
 
 
 
