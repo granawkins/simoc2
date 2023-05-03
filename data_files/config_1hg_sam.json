@@ -1,0 +1,217 @@
+{
+    "agents": {
+        "human": {
+            "amount": 1
+        },
+        "solar_pv_array_mars": {
+            "amount": 100
+        },
+        "crew_habitat_sam": {
+            "amount": 1,
+            "storage": {
+                "n2": 265.48560000000003,
+                "o2": 71.21640000000001,
+                "co2": 0.1405288,
+                "ch4": 0.0006358,
+                "h2": 0.00018700000000000002,
+                "h2o": 3.4
+            }
+        },
+        "greenhouse_sam": {
+            "amount": 1,
+            "storage": {
+                "n2": 482.1687,
+                "o2": 129.34155,
+                "co2": 0.2552251,
+                "ch4": 0.001154725,
+                "h2": 0.000339625,
+                "h2o": 6.175
+            }
+        },
+        "atmosphere_equalizer": {
+            "amount": 1
+        },
+        "rice": {
+            "amount": 2,
+            "flows": {
+                "in": {
+                    "par": {
+                        "connections": [
+                            "rice_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "cabbage": {
+            "amount": 8,
+            "flows": {
+                "in": {
+                    "par": {
+                        "connections": [
+                            "cabbage_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "tomato": {
+            "amount": 8,
+            "flows": {
+                "in": {
+                    "par": {
+                        "connections": [
+                            "tomato_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "sweet_potato": {
+            "amount": 5,
+            "flows": {
+                "in": {
+                    "par": {
+                        "connections": [
+                            "sweet_potato_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "food_storage": {
+            "amount": 1
+        },
+        "rice_lamp": {
+            "amount": 2,
+            "prototypes": [
+                "lamp"
+            ],
+            "flows": {
+                "out": {
+                    "par": {
+                        "connections": [
+                            "rice_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "cabbage_lamp": {
+            "amount": 8,
+            "prototypes": [
+                "lamp"
+            ],
+            "flows": {
+                "out": {
+                    "par": {
+                        "connections": [
+                            "cabbage_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "tomato_lamp": {
+            "amount": 8,
+            "prototypes": [
+                "lamp"
+            ],
+            "flows": {
+                "out": {
+                    "par": {
+                        "connections": [
+                            "tomato_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "sweet_potato_lamp": {
+            "amount": 5,
+            "prototypes": [
+                "lamp"
+            ],
+            "flows": {
+                "out": {
+                    "par": {
+                        "connections": [
+                            "sweet_potato_lamp"
+                        ]
+                    }
+                }
+            }
+        },
+        "ration_storage": {
+            "storage": {
+                "ration": 300
+            }
+        },
+        "water_storage": {
+            "amount": 1,
+            "storage": {
+                "potable": 689.4,
+                "treated": 76.60000000000001
+            }
+        },
+        "nutrient_storage": {
+            "amount": 1,
+            "storage": {
+                "fertilizer": 300
+            }
+        },
+        "power_storage": {
+            "amount": 1,
+            "storage": {
+                "kwh": 1000
+            }
+        },
+        "solid_waste_aerobic_bioreactor": {
+            "amount": 1
+        },
+        "multifiltration_purifier_post_treatment": {
+            "amount": 1
+        },
+        "oxygen_generation_SFWE": {
+            "amount": 1
+        },
+        "urine_recycling_processor_VCD": {
+            "amount": 1
+        },
+        "co2_removal_SAWD": {
+            "amount": 1
+        },
+        "co2_makeup_valve": {
+            "amount": 1
+        },
+        "co2_storage": {
+            "amount": 1
+        },
+        "co2_reduction_sabatier": {
+            "amount": 1
+        },
+        "ch4_removal_agent": {
+            "amount": 1
+        },
+        "dehumidifier": {
+            "amount": 1
+        }
+    },
+    "termination": [
+        {
+            "condition": "time",
+            "value": 100,
+            "unit": "day"
+        }
+    ],
+    "seed": 1000,
+    "location": "mars",
+    "priorities": [
+        "structures",
+        "storage",
+        "power_generation",
+        "inhabitants",
+        "eclss",
+        "plants"
+    ]
+}

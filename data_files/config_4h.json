@@ -1,0 +1,92 @@
+{
+    "agents": {
+        "human": {
+            "amount": 4
+        },
+        "solar_pv_array_mars": {
+            "amount": 30
+        },
+        "crew_habitat_small": {
+            "amount": 1,
+            "storage": {
+                "n2": 976.05,
+                "o2": 261.82500000000005,
+                "co2": 0.5166499999999999,
+                "ch4": 0.0023374999999999997,
+                "h2": 0.0006875000000000001,
+                "h2o": 12.5
+            }
+        },
+        "ration_storage": {
+            "storage": {
+                "ration": 100
+            }
+        },
+        "water_storage": {
+            "amount": 1,
+            "storage": {
+                "potable": 900.0,
+                "treated": 100.0
+            }
+        },
+        "nutrient_storage": {
+            "amount": 1,
+            "storage": {
+                "fertilizer": 300
+            }
+        },
+        "power_storage": {
+            "amount": 1,
+            "storage": {
+                "kwh": 1000
+            }
+        },
+        "solid_waste_aerobic_bioreactor": {
+            "amount": 1
+        },
+        "multifiltration_purifier_post_treatment": {
+            "amount": 1
+        },
+        "oxygen_generation_SFWE": {
+            "amount": 1
+        },
+        "urine_recycling_processor_VCD": {
+            "amount": 1
+        },
+        "co2_removal_SAWD": {
+            "amount": 2
+        },
+        "co2_makeup_valve": {
+            "amount": 1
+        },
+        "co2_storage": {
+            "amount": 1
+        },
+        "co2_reduction_sabatier": {
+            "amount": 1
+        },
+        "ch4_removal_agent": {
+            "amount": 1
+        },
+        "dehumidifier": {
+            "amount": 1
+        }
+    },
+    "termination": [
+        {
+            "condition": "time",
+            "value": 10,
+            "unit": "day"
+        }
+    ],
+    "seed": 1000,
+    "location": "mars",
+    "priorities": [
+        "structures",
+        "storage",
+        "power_generation",
+        "inhabitants",
+        "eclss",
+        "plants"
+    ]
+}
