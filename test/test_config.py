@@ -284,3 +284,32 @@ class TestConfigs:
         comparison_report = compare_records(records, stem)
         with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
             json.dump(comparison_report, f, indent=2)
+
+
+    def test_config_b2_mission1b(self):
+        stem = 'b2_mission1b'
+        config = load_data_file(f'config_{stem}.json')
+        model = Model.from_config(**config)
+        model.run()
+        human = model.agents['human']
+        assert human.active == 8
+
+        records = model.get_records()
+        comparison_report = compare_records(records, stem)
+        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
+            json.dump(comparison_report, f, indent=2)
+
+
+
+    def test_config_b2_mission2(self):
+        stem = 'b2_mission2'
+        config = load_data_file(f'config_{stem}.json')
+        model = Model.from_config(**config)
+        model.run()
+        human = model.agents['human']
+        assert human.active == 8
+
+        records = model.get_records()
+        comparison_report = compare_records(records, stem)
+        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
+            json.dump(comparison_report, f, indent=2)

@@ -46,7 +46,14 @@ def merge_json(default, to_merge):
             default[k] = v if k not in default else merge_json(default[k], v)
         return default
     elif isinstance(to_merge, list):
-        return list(set(default).union(set(to_merge)))
+        if len(to_merge) == 0:
+            return default
+        elif isinstance(to_merge[0], dict):
+            return to_merge
+        elif isinstance(to_merge[0], str):
+            return list(set(default).union(set(to_merge)))
+        else:
+            raise ValueError(f'Cannot merge lists of type {type(to_merge[0])}')
     elif isinstance(to_merge, (str, int, float, bool)):
         return to_merge
 

@@ -1,0 +1,155 @@
+{
+  "human": {
+    "flows": {
+      "in_o2": -3.812215798854757e-12,
+      "in_potable": -2.0085299424949322e-12,
+      "in_ration": -1.0362081563168044e-12,
+      "out_co2": 0.0,
+      "out_h2o": 0.0,
+      "out_urine": 0.0,
+      "out_feces": -1.8503717077085995e-14
+    },
+    "attributes": {
+      "in_potable_deprive": -74.89583333333333,
+      "in_food_deprive": -74.89583333333333
+    }
+  },
+  "solar_pv_array_mars": {
+    "flows": {
+      "out_kwh": 3.26829912965746
+    },
+    "attributes": {}
+  },
+  "crew_habitat_small": {
+    "storage": {
+      "o2": 0.4834362915067728,
+      "co2": -4.858784244783583,
+      "n2": 0.41666666666666335,
+      "ch4": 4.121211447377194,
+      "h2": -1.7156733316386354,
+      "h2o": -4.2291148665454585
+    },
+    "flows": {
+      "in_kwh": -1.048384707871777e-13
+    },
+    "attributes": {}
+  },
+  "ration_storage": {
+    "storage": {
+      "ration": 0.9853890587835475
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "water_storage": {
+    "storage": {
+      "potable": 0.3679209367842937,
+      "urine": -1.1576102077533017,
+      "feces": -0.4453711817893399,
+      "treated": 10.277654831431688
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "nutrient_storage": {
+    "storage": {
+      "inedible_biomass": 0,
+      "fertilizer": 0.41665308917671245,
+      "waste": -0.8120974516942017
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "power_storage": {
+    "storage": {
+      "kwh": 1.560073251283475
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "solid_waste_aerobic_bioreactor": {
+    "flows": {
+      "in_feces": 0.0,
+      "in_kwh": 4.1483259523850656e-13,
+      "in_o2": -1.6168265286253988e-10,
+      "out_fertilizer": -9.06934584236483e-10,
+      "out_urine": 0.0,
+      "out_co2": -3.77784223657157e-12,
+      "out_ch4": -1.9274705288631184e-14
+    },
+    "attributes": {}
+  },
+  "multifiltration_purifier_post_treatment": {
+    "flows": {
+      "in_treated": 0.0,
+      "in_kwh": 4.699787326440244e-10,
+      "out_potable": 4.0566222202182364e-14
+    },
+    "attributes": {}
+  },
+  "oxygen_generation_SFWE": {
+    "flows": {
+      "in_potable": -2.602169219944608e-12,
+      "in_kwh": 5.630995611863465e-12,
+      "out_h2": 0.0,
+      "out_o2": 2.758919341847874e-12
+    },
+    "attributes": {}
+  },
+  "urine_recycling_processor_VCD": {
+    "flows": {
+      "in_urine": 0.0,
+      "in_kwh": 1.5463732645900716e-12,
+      "out_treated": 1.2084060131974492e-14,
+      "out_waste": 0.0
+    },
+    "attributes": {}
+  },
+  "co2_removal_SAWD": {
+    "flows": {
+      "in_co2": 0.4405286343612354,
+      "in_kwh": 0.44052863436518225,
+      "out_co2": 0.4405286343612354
+    },
+    "attributes": {}
+  },
+  "co2_makeup_valve": {
+    "flows": {
+      "in_co2": 0.0,
+      "out_co2": 0.0
+    },
+    "attributes": {}
+  },
+  "co2_storage": {
+    "storage": {
+      "co2": 0.0
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "co2_reduction_sabatier": {
+    "flows": {
+      "in_h2": 1.0752688172032776,
+      "in_co2": 3.296703296699208,
+      "in_kwh": 3.296703296684353,
+      "out_ch4": 3.296703296703285,
+      "out_feces": 3.2967032967033334
+    },
+    "attributes": {}
+  },
+  "ch4_removal_agent": {
+    "flows": {
+      "in_ch4": 0.0,
+      "in_kwh": 0.0
+    },
+    "attributes": {}
+  },
+  "dehumidifier": {
+    "flows": {
+      "in_h2o": 0.0,
+      "in_kwh": 0.0,
+      "out_treated": 0.0
+    },
+    "attributes": {}
+  }
+}

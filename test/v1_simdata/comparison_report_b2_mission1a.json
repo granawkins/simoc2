@@ -1,0 +1,561 @@
+{
+  "human": {
+    "flows": {
+      "in_o2": 2.3127512545494567e-12,
+      "in_potable": -1.038653913776631e-09,
+      "in_rice": 0.4602071031093112,
+      "in_wheat": 1.0069202823123453,
+      "in_cabbage": 0.0,
+      "in_chard": 0.0,
+      "in_celery": 0.0,
+      "in_lettuce": 0.0,
+      "in_spinach": 0.0,
+      "in_dry_bean": -2.4023449109868174,
+      "in_peanut": 0.20469088911634561,
+      "in_soybean": -0.8875654923608934,
+      "in_strawberry": 0.0,
+      "in_tomato": 0.0,
+      "in_green_onion": 0.0,
+      "in_onion": 0.0,
+      "in_pea": 0.0,
+      "in_pepper": 0.0,
+      "in_snap_bean": 0.0,
+      "in_radish": 0.0,
+      "in_red_beet": 0.0,
+      "in_carrot": 0.0,
+      "in_sweet_potato": 1.8589070457185914,
+      "in_white_potato": 0.0,
+      "in_corn": 1.0069202188787143,
+      "in_orchard": 0.43711478639167234,
+      "in_sorghum": 1.006920218881228,
+      "in_vegetables": -0.9186428973906388,
+      "out_co2": 0.0,
+      "out_h2o": -1.5541644977832163e-14,
+      "out_urine": 0.0,
+      "out_feces": 0.2980241795505451
+    },
+    "attributes": {
+      "in_potable_deprive": -87.49890350877193,
+      "in_food_deprive": -87.46982483354302
+    }
+  },
+  "concrete": {
+    "storage": {
+      "caoh2": 0.10352360810176768,
+      "caco3": -0.7948126913940463,
+      "moisture": -0.7948126913939346
+    },
+    "flows": {
+      "in_co2": -1.5018879497550823,
+      "in_caoh2": -1.5018879497534272,
+      "out_caco3": -1.5018879497554765,
+      "out_moisture": -1.5018879497558038
+    },
+    "attributes": {
+      "carbonation_rate": -1.5018879497555113,
+      "carbonation": -0.7948126913929328
+    }
+  },
+  "b2_power_gen": {
+    "flows": {
+      "out_kwh": 2.0668548798544464
+    },
+    "attributes": {}
+  },
+  "crew_habitat_b2": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.5530722262360439,
+      "ch4": 0.25275018522624226,
+      "o2": -0.015285707009822036,
+      "n2": 0.008771929824563825,
+      "co2": -2.923631082321196
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "greenhouse_b2": {
+    "storage": {
+      "h2": 0,
+      "h2o": 1.168123437666088,
+      "ch4": 0.38071043466073695,
+      "o2": -0.026739610041513262,
+      "n2": 0.008771929824560173,
+      "co2": -1.706642871787498
+    },
+    "flows": {
+      "in_o2": 9.931118126407128e-11,
+      "out_co2": 0.0
+    },
+    "attributes": {}
+  },
+  "rainforest_biome": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.937113462645614,
+      "ch4": 0.3816570340317774,
+      "o2": -0.02398300702181631,
+      "n2": 0.008771929824563129,
+      "co2": -2.064191032064593
+    },
+    "flows": {
+      "in_o2": -2.333450768380384e-10,
+      "out_co2": 0.0
+    },
+    "attributes": {}
+  },
+  "desert_biome": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.9185776212363541,
+      "ch4": 0.3805329472783106,
+      "o2": -0.020795373821502792,
+      "n2": 0.008771929824556752,
+      "co2": -2.6279340449588804
+    },
+    "flows": {
+      "in_co2": -1.5612231328461828e-14,
+      "out_o2": -9.435253320710263e-11
+    },
+    "attributes": {}
+  },
+  "ocean_biome": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.9289050851488221,
+      "ch4": 0.3804146223566983,
+      "o2": -0.021708163881768317,
+      "n2": 0.008771929824559656,
+      "co2": -2.4641585648997344
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "savannah_biome": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.9120498639257627,
+      "ch4": 0.38071043466074367,
+      "o2": -0.024562052702008074,
+      "n2": 0.008771929824560917,
+      "co2": -1.9661470353118056
+    },
+    "flows": {
+      "in_o2": -1.842786197605162e-10,
+      "out_co2": 0.0
+    },
+    "attributes": {}
+  },
+  "west_lung": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.9193166991601072,
+      "ch4": 0.3804737848182538,
+      "o2": -0.021711875565051064,
+      "n2": 0.008771929824561401,
+      "co2": -2.464244584152471
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "south_lung": {
+    "storage": {
+      "h2": 0,
+      "h2o": 0.9313976041738661,
+      "ch4": 0.38082875958251133,
+      "o2": -0.021715562755305833,
+      "n2": 0.008771929824561401,
+      "co2": -2.463556653440934
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "rice": {
+    "storage": {
+      "biomass": 2.6072371976601265
+    },
+    "flows": {
+      "in_co2": 3.1146027941943477,
+      "in_potable": 3.1146027913654595,
+      "in_fertilizer": 3.114602794012663,
+      "out_o2": 3.1146027941979635,
+      "out_h2o": 3.1146027913649577,
+      "out_biomass": 1.508273670910392,
+      "out_rice": -48.85187386302679,
+      "out_inedible_biomass": -48.85187386302679
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 1.4506899282012047,
+      "growth_rate": 105.21873706952711,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.81983821582257,
+      "in_potable_deprive": -99.81983821582257,
+      "in_fertilizer_deprive": -99.81983821582257
+    }
+  },
+  "wheat": {
+    "storage": {
+      "biomass": 2.3920226898426358
+    },
+    "flows": {
+      "in_co2": -0.6938462890537438,
+      "in_potable": -0.6938462905972862,
+      "in_fertilizer": -0.6938462891991217,
+      "out_o2": -0.6938462890456086,
+      "out_h2o": -0.6938462905978885,
+      "out_biomass": 0.9992277718087903,
+      "out_wheat": -48.889646748243045,
+      "out_inedible_biomass": -48.88964674824302
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": -0.4678893585288116,
+      "growth_rate": 104.78706944406954,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.73127798851483,
+      "in_potable_deprive": -99.73127798851483,
+      "in_fertilizer_deprive": -99.73127798851483
+    }
+  },
+  "sorghum": {
+    "storage": {
+      "biomass": 2.3920225306285294
+    },
+    "flows": {
+      "in_co2": -0.6938464068496131,
+      "in_potable": -0.6938464077846757,
+      "in_fertilizer": -0.6938464058773943,
+      "out_o2": -0.6938464068290776,
+      "out_h2o": -0.6938464077891537,
+      "out_biomass": 0.999227699510335,
+      "out_sorghum": -48.88964679007151,
+      "out_inedible_biomass": -48.889646790071524
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": -0.4678893585288116,
+      "growth_rate": 104.78706912545096,
+      "cu_factor": -0.0070359893293483,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.61905308716662,
+      "in_potable_deprive": -99.61905308716662,
+      "in_fertilizer_deprive": -99.61905308716662
+    }
+  },
+  "peanut": {
+    "storage": {
+      "biomass": 2.468211896834421
+    },
+    "flows": {
+      "in_co2": 3.538346560145629,
+      "in_potable": 3.5383465563944267,
+      "in_fertilizer": 3.538346560171432,
+      "out_o2": 3.5383465601346775,
+      "out_h2o": 3.538346556395443,
+      "out_biomass": 1.464565846936876,
+      "out_peanut": -48.939094534593515,
+      "out_inedible_biomass": -48.93909453459362
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 1.4999238346724064,
+      "growth_rate": 104.94138905266554,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.43163899331662,
+      "in_potable_deprive": -99.43163899331662,
+      "in_fertilizer_deprive": -99.43163899331662
+    }
+  },
+  "corn": {
+    "storage": {
+      "biomass": 2.392022530631129
+    },
+    "flows": {
+      "in_co2": -0.6938464068511279,
+      "in_potable": -0.6938464077869555,
+      "in_fertilizer": -0.6938464066681354,
+      "out_o2": -0.693846406838092,
+      "out_h2o": -0.6938464077895273,
+      "out_biomass": 0.9992276995100522,
+      "out_corn": -48.88964679007147,
+      "out_inedible_biomass": -48.88964679007143
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": -0.4678893585288116,
+      "growth_rate": 104.78706912545117,
+      "cu_factor": -0.0070359893293483,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.79625585194772,
+      "in_potable_deprive": -99.79625585194772,
+      "in_fertilizer_deprive": -99.79625585194772
+    }
+  },
+  "dry_bean": {
+    "storage": {
+      "biomass": -1.0812754314971096
+    },
+    "flows": {
+      "in_co2": -3.221246617521762,
+      "in_potable": -3.221246621456579,
+      "in_fertilizer": -3.221246617469581,
+      "out_o2": -3.2212466175163024,
+      "out_h2o": -3.221246621455725,
+      "out_biomass": -1.788574932612583,
+      "out_dry_bean": -50.78496774984447,
+      "out_inedible_biomass": -50.78496774984441
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": -1.5208436772165321,
+      "growth_rate": 97.84170313386909,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.5550188346241,
+      "in_potable_deprive": -99.5550188346241,
+      "in_fertilizer_deprive": -99.5550188346241
+    }
+  },
+  "sweet_potato": {
+    "storage": {
+      "biomass": 3.306803121525601
+    },
+    "flows": {
+      "in_co2": 2.625823501158805,
+      "in_potable": 2.6258234995503904,
+      "in_fertilizer": 2.6258235009778335,
+      "out_o2": 2.6258235011567344,
+      "out_h2o": 2.625823499551274,
+      "out_biomass": 1.8391592168902713,
+      "out_sweet_potato": -48.42014603012256,
+      "out_inedible_biomass": -48.4201460301226
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 1.4602816818433486,
+      "growth_rate": 106.61676286839068,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.63413602652864,
+      "in_potable_deprive": -99.63413602652864,
+      "in_fertilizer_deprive": -99.63413602652864
+    }
+  },
+  "vegetables": {
+    "storage": {
+      "biomass": 1.4006970340528027
+    },
+    "flows": {
+      "in_co2": 1.9874123323131279,
+      "in_potable": 1.987412328936746,
+      "in_fertilizer": 1.987412332210918,
+      "out_o2": 1.9874123323137118,
+      "out_h2o": 1.9874123289362353,
+      "out_biomass": 0.6222480589545686,
+      "out_vegetables": -49.49044942536086,
+      "out_inedible_biomass": -49.49044942536071
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 0.6288909484111286,
+      "growth_rate": 102.80525608337226,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.7186267672694,
+      "in_potable_deprive": -99.7186267672694,
+      "in_fertilizer_deprive": -99.7186267672694
+    }
+  },
+  "soybean": {
+    "storage": {
+      "biomass": 2.4495285939236835
+    },
+    "flows": {
+      "in_co2": 0.6131023078084342,
+      "in_potable": 0.613102306345612,
+      "in_fertilizer": 0.6131023080683385,
+      "out_o2": 0.6131023077609622,
+      "out_h2o": 0.6131023063444853,
+      "out_biomass": 2.002996523373888,
+      "out_soybean": -48.977158100699455,
+      "out_inedible_biomass": -48.97715810069948
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 1.4412073355734307,
+      "growth_rate": 104.89988553964595,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.70708436479747,
+      "in_potable_deprive": -99.70708436479747,
+      "in_fertilizer_deprive": -99.70708436479747
+    }
+  },
+  "orchard": {
+    "storage": {
+      "biomass": 4.0408471339326315
+    },
+    "flows": {
+      "in_co2": 4.744202893701066,
+      "in_potable": 4.744202891458396,
+      "in_fertilizer": 4.744202893848097,
+      "out_o2": 4.744202893697375,
+      "out_h2o": 4.744202891457673,
+      "out_biomass": 3.5830634880894845,
+      "out_orchard": -48.16145113725685,
+      "out_inedible_biomass": -48.16145113725687
+    },
+    "attributes": {
+      "grown": 0.0,
+      "par_factor": 1.448569196838084,
+      "growth_rate": 108.08303802005474,
+      "cu_factor": 0.010152974093678718,
+      "te_factor": 0.010699925580114454,
+      "in_co2_deprive": -99.85111123935569,
+      "in_potable_deprive": -99.85111123935569,
+      "in_fertilizer_deprive": -99.85111123935569
+    }
+  },
+  "food_storage": {
+    "storage": {
+      "rice": 2.2728995302010344,
+      "wheat": 3.002535955622584,
+      "cabbage": 0,
+      "chard": 0,
+      "celery": 0,
+      "lettuce": 0,
+      "spinach": 0,
+      "dry_bean": -0.08624120606968765,
+      "peanut": 0.7543513110617962,
+      "soybean": 2.6435985875147163,
+      "strawberry": 0,
+      "tomato": 0,
+      "green_onion": 0,
+      "onion": 0,
+      "pea": 0,
+      "pepper": 0,
+      "snap_bean": 0,
+      "radish": 0,
+      "red_beet": 0,
+      "carrot": 0,
+      "sweet_potato": 3.8668914199942264,
+      "white_potato": 0,
+      "sorghum": 3.0025358936074396,
+      "vegetables": 0.09535296853352651,
+      "corn": 3.002535893607013,
+      "orchard": 3.6237441851036314
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "b2_sun": {
+    "storage": {
+      "par": 1.5650289016890033
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "water_storage": {
+    "storage": {
+      "potable": 0.1166730412397847,
+      "urine": 0.20033864273107654,
+      "feces": 0.53240288195152,
+      "treated": -55.41642519229419
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "nutrient_storage": {
+    "storage": {
+      "inedible_biomass": 0.8046167677745466,
+      "fertilizer": 0.021556118440677622,
+      "waste": 0.005861777967734411
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "power_storage": {
+    "storage": {
+      "kwh": -0.012243575936421693
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "solid_waste_aerobic_bioreactor": {
+    "flows": {
+      "in_feces": 0.33670033670033667,
+      "in_kwh": 0.3367003367004214,
+      "in_o2": 0.33670033653874587,
+      "out_fertilizer": 0.34429056753513,
+      "out_urine": 0.33670033670034205,
+      "out_co2": 0.33670033669661104,
+      "out_ch4": 0.3367003367003367
+    },
+    "attributes": {}
+  },
+  "urine_recycling_processor_VCD": {
+    "flows": {
+      "in_urine": 0.0,
+      "in_kwh": 1.0262971724506025e-13,
+      "out_treated": 9.431461566418969e-14,
+      "out_waste": 0.0
+    },
+    "attributes": {}
+  },
+  "multifiltration_purifier_post_treatment": {
+    "flows": {
+      "in_treated": 0.9621764705883846,
+      "in_kwh": 0.9621749264741316,
+      "out_potable": 0.9992157550071724
+    },
+    "attributes": {}
+  },
+  "co2_removal_SAWD": {
+    "flows": {
+      "in_co2": 2.5937500000006555,
+      "in_kwh": 5.1875,
+      "out_co2": 5.187500000001299
+    },
+    "attributes": {}
+  },
+  "co2_makeup_valve": {
+    "flows": {
+      "in_co2": 0.0,
+      "out_co2": 0.0
+    },
+    "attributes": {}
+  },
+  "dehumidifier": {
+    "flows": {
+      "in_h2o": 0.4807692307692308,
+      "in_kwh": 0.9615384615384616,
+      "out_treated": 0.9615384615384616
+    },
+    "attributes": {}
+  },
+  "o2_makeup_valve": {
+    "flows": {
+      "in_o2": 0.0,
+      "out_o2": 0.0
+    },
+    "attributes": {}
+  },
+  "o2_storage": {
+    "storage": {
+      "o2": 0
+    },
+    "flows": {},
+    "attributes": {}
+  },
+  "co2_storage": {
+    "storage": {
+      "co2": 6.100260864736249
+    },
+    "flows": {},
+    "attributes": {}
+  }
+}

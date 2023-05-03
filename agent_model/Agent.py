@@ -733,7 +733,7 @@ class ConcreteAgent(Agent):
         saturation_point_kmoles = np.interp(ppm, cls.ppm_range, cls.rate_scale)
         return saturation_point_kmoles * cls.density
 
-    def step(self):
+    def step(self, dT=1):
         """Set the carbonation rate, which is used to weight exchanges"""
         # Calculate ppm of CO2 in atmosphere
         ref_agent_name = self.flows['in']['co2']['connections'][0]
@@ -745,4 +745,4 @@ class ConcreteAgent(Agent):
         gradient = max(0, max_carbonation - self.attributes['carbonation'])
         self.attributes['carbonation_rate'] = gradient * self.diffusion_rate
         self.attributes['carbonation'] += self.attributes['carbonation_rate']
-        super().step()
+        super().step(dT)

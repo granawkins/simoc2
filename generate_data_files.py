@@ -55,8 +55,19 @@ def update_desc(agent_type, desc):
                     f['connections'] = [agent_type]
                 if 'par_baseline' in f['weighted']:
                     f['weighted'] = [w for w in f['weighted'] if w != 'par_baseline']
+            if agent_type == 'greenhouse_b2':
+                f['connections'] = ['greenhouse_b2']
             
             new_desc['flows'][newDirection][currency] = f
+    
+    # Special case
+    if agent_type == 'b2_sun':
+        new_desc['flows'] = {'out': {'par': {
+            'value': 1,
+            'flow_rate': {'unit': 'mol', 'time': 'hour'},
+            'weighted': ['daily_growth_factor', 'monthly_growth_factor'],
+            'connections': ['b2_sun'],
+        }}}
 
     for char in desc['data']['characteristics']:
         char_type = char['type']
@@ -219,8 +230,23 @@ for config_name in config_names:
                 reformatted_agent['flows'] = {'out': {'par': {'connections': [agent]}}}
             elif f'{agent}_lamp' in v:
                 reformatted_agent['flows'] = {'in': {'par': {'connections': [f'{agent}_lamp']}}}
-
+            
+            # Add custom b2 elements
             new_name = rename_agents.get(agent, agent)
+            if 'b2' in config_name:
+                if new_agent_desc[new_name].get('agent_class') == 'plants':
+                    reformatted_agent['properties'] = {'density_factor': {'value': 0.5}}
+                    if 'b2_mission2' in config_name:
+                        reformatted_agent['properties']['crop_management_factor'] = {'value': 1.5}
+                elif new_name == 'human':
+                    food_flow = new_agent_desc['human']['flows']['in']['food']['value']
+                    reformatted_agent['flows'] = {'in': {'food': {'value': food_flow / 2}}}
+                elif new_name == 'co2_removal_SAWD':
+                    criteria = new_agent_desc['co2_removal_SAWD']['flows']['in']['co2']['criteria']
+                    criteria[0]['value'] = 0.0025
+                    from IPython import embed; embed()
+                    reformatted_agent['flows'] = {'in': {'co2': {'criteria': criteria}}}
+
             reformatted_config['agents'][new_name] = reformatted_agent
     with open(f'data_files/config_{config_name}.json', 'w') as f:
         json.dump(reformatted_config, f, indent=4)

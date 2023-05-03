@@ -7103,8 +7103,22 @@
             }
         },
         "flows": {
-            "in": {},
-            "out": {}
+            "out": {
+                "par": {
+                    "value": 1,
+                    "flow_rate": {
+                        "unit": "mol",
+                        "time": "hour"
+                    },
+                    "weighted": [
+                        "daily_growth_factor",
+                        "monthly_growth_factor"
+                    ],
+                    "connections": [
+                        "b2_sun"
+                    ]
+                }
+            }
         },
         "capacity": {
             "par": 5
@@ -7140,34 +7154,7 @@
                         "time": "hour"
                     },
                     "connections": [
-                        "cabbage",
-                        "carrot",
-                        "celery",
-                        "chard",
-                        "corn",
-                        "dry_bean",
-                        "green_onion",
-                        "lettuce",
-                        "onion",
-                        "orchard",
-                        "pea",
-                        "peanut",
-                        "pepper",
-                        "radish",
-                        "red_beet",
-                        "rice",
-                        "snap_bean",
-                        "sorghum",
-                        "soybean",
-                        "spinach",
-                        "strawberry",
-                        "sweet_potato",
-                        "tomato",
-                        "vegetables",
-                        "wheat",
-                        "white_potato",
-                        "greenhouse_b2",
-                        "o2_makeup_valve"
+                        "greenhouse_b2"
                     ]
                 }
             },
@@ -7179,35 +7166,7 @@
                         "time": "hour"
                     },
                     "connections": [
-                        "co2_removal_SAWD",
-                        "cabbage",
-                        "carrot",
-                        "celery",
-                        "chard",
-                        "corn",
-                        "dry_bean",
-                        "green_onion",
-                        "lettuce",
-                        "onion",
-                        "orchard",
-                        "pea",
-                        "peanut",
-                        "pepper",
-                        "radish",
-                        "red_beet",
-                        "rice",
-                        "snap_bean",
-                        "sorghum",
-                        "soybean",
-                        "spinach",
-                        "strawberry",
-                        "sweet_potato",
-                        "tomato",
-                        "vegetables",
-                        "wheat",
-                        "white_potato",
-                        "greenhouse_b2",
-                        "concrete"
+                        "greenhouse_b2"
                     ]
                 }
             }
