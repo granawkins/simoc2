@@ -11,7 +11,7 @@ from ..agent_model.Model import (DEFAULT_START_TIME,
                                  DEFAULT_PRIORITIES,
                                  Model, 
                                  Scheduler)
-from ..agent_model.Agent import Agent
+from ..agent_model.agents import BaseAgent
 from ..agent_model.util import get_default_agent_data
 
 class MockModel:
@@ -176,7 +176,7 @@ class TestModel:
         # Check that agent is merged with default agent data
         default_o2_storage_agent = get_default_agent_data('o2_storage')
         o2_storage_agent = model.agents['o2_storage']
-        assert isinstance(o2_storage_agent, Agent)
+        assert isinstance(o2_storage_agent, BaseAgent)
         assert o2_storage_agent.description == 'test_description'
         assert o2_storage_agent.capacity == default_o2_storage_agent['capacity']
 

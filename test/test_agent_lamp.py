@@ -1,7 +1,7 @@
 import pytest
 import datetime
 import numpy as np
-from ..agent_model.Agent import LampAgent
+from ..agent_model.agents import LampAgent
 
 class MockModel:
     agents = {}

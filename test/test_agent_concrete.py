@@ -1,6 +1,6 @@
 from copy import deepcopy
 import pytest
-from ..agent_model.Agent import Agent, ConcreteAgent
+from ..agent_model.agents import BaseAgent, ConcreteAgent
 
 @pytest.fixture
 def minimum_kwargs():
@@ -78,7 +78,7 @@ def mock_model(concrete_kwargs):
     model = MockModel()
     model.agents = {
         'concrete': ConcreteAgent(model, 'concrete', **concrete_kwargs),
-        'test_greenhouse': Agent(model, 'test_greenhouse',
+        'test_greenhouse': BaseAgent(model, 'test_greenhouse',
                                  storage={'o2': 999.65, 'co2': 0.35},
                                  capacity={'o2': 1000, 'co2': 1000})
     }

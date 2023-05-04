@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 
 # DATA HANDLING
-
 def load_data_file(fname, data_dir=None):
     """Load data file from data directory."""
     if data_dir is None:
@@ -50,7 +49,7 @@ def merge_json(default, to_merge):
             return default
         elif isinstance(to_merge[0], dict):
             return to_merge
-        elif isinstance(to_merge[0], str):
+        elif isinstance(to_merge[0], (str, int, float)):
             return list(set(default).union(set(to_merge)))
         else:
             raise ValueError(f'Cannot merge lists of type {type(to_merge[0])}')
@@ -64,6 +63,13 @@ def recursively_clear_lists(r):
         return {k: recursively_clear_lists(v) for k, v in r.items()}
     elif isinstance(r, list):
         return []
+    
+def recursively_check_required_kwargs(given, required):
+    for key, value in required.items():
+        if key not in given:
+            raise ValueError(f'{key} not found in {given}')
+        if isinstance(value, dict):
+            recursively_check_required_kwargs(given[key], value)
 
 # LIMIT FUNCTIONS (THRESHOLD AND CRITERIA)
 operator_dict = {

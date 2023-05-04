@@ -2,7 +2,7 @@ import copy
 import datetime
 import pytest
 import numpy as np
-from ..agent_model.Agent import PlantAgent, Agent
+from ..agent_model.agents import PlantAgent, BaseAgent
 from ..agent_model.util import get_default_currency_data, get_default_agent_data
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def mock_model():
 @pytest.fixture
 def basic_model(mock_model, basic_kwargs):
     test_agent = PlantAgent(mock_model, 'test_plant', **basic_kwargs)
-    test_greenhouse = Agent(
+    test_greenhouse = BaseAgent(
         mock_model, 'test_greenhouse', 
         capacity={'co2': 10, 'par': 10, 'inedible_biomass': 10},
         storage={'co2': 10, 'par': 10},
@@ -59,26 +59,26 @@ def basic_model(mock_model, basic_kwargs):
 def wheat_model(mock_model, wheat_kwargs):
     wheat_kwargs['flows']['in']['par']['connections'] = ['lamp']
     wheat_agent = PlantAgent(mock_model, 'wheat', **wheat_kwargs)
-    greenhouse = Agent(
+    greenhouse = BaseAgent(
         mock_model, 'greenhouse', 
         capacity={'co2': 1e5, 'o2': 1e5, 'h2o': 1e5},
         storage={'co2': 1e5},
     )
-    water_storage = Agent(
+    water_storage = BaseAgent(
         mock_model, 'water_storage',
         capacity={'potable': 1e5},
         storage={'potable': 1e5},
     )
-    nutrient_storage = Agent(
+    nutrient_storage = BaseAgent(
         mock_model, 'nutrient_storage',
         capacity={'fertilizer': 1e5, 'inedible_biomass': 10},
         storage={'fertilizer': 1e5},
     )
-    food_storage = Agent(
+    food_storage = BaseAgent(
         mock_model, 'food_storage',
         capacity={'wheat': 1e5},
     )
-    lamp = Agent(
+    lamp = BaseAgent(
         mock_model, 'lamp',
         capacity={'par': 1e5},
         storage={'par': 1e5},

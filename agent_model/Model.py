@@ -3,7 +3,7 @@ from copy import deepcopy
 import datetime
 import numpy as np
 from .util import get_default_currency_data, load_data_file, merge_json, recursively_clear_lists
-from .Agent import Agent, PlantAgent, LampAgent, SunAgent, AtmosphereEqualizerAgent, ConcreteAgent
+from .agents import BaseAgent, PlantAgent, LampAgent, SunAgent, AtmosphereEqualizerAgent, ConcreteAgent
 
 DEFAULT_START_TIME = '1991-01-01T00:00:00'
 DEFAULT_TIME_UNIT = 'hours'
@@ -120,7 +120,7 @@ class Model:
             elif 'concrete' in agent_id:
                 build_from_class = ConcreteAgent
             else:
-                build_from_class = Agent
+                build_from_class = BaseAgent
 
             agent = build_from_class(model, **agent_data)
             model.add_agent(agent_id, agent)

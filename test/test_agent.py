@@ -1,7 +1,7 @@
 import copy
 import datetime
 import pytest
-from ..agent_model.Agent import Agent
+from ..agent_model.agents import BaseAgent
 from ..agent_model.util import get_default_currency_data
 
 @pytest.fixture
@@ -43,7 +43,7 @@ class TestAgentInit:
     def test_agent_init_empty(self):
         """Confirm that all attributes are set correctly when no kwargs are passed"""
         model = object()
-        test_agent = Agent(model, 'test_agent')
+        test_agent = BaseAgent(model, 'test_agent')
         assert test_agent.agent_id == 'test_agent'
         assert test_agent.amount == 1
         assert test_agent.model == model
@@ -59,7 +59,7 @@ class TestAgentInit:
 
     def test_agent_init_full(self, kwargs):
         """Confirm that all kwargs are set correctly"""
-        test_agent = Agent(**kwargs)
+        test_agent = BaseAgent(**kwargs)
         for k, v in kwargs.items():
             assert str(getattr(test_agent, k)) == str(v)
         
@@ -71,7 +71,7 @@ class TestAgentInit:
         not modified by the external changes to the kwargs object. This test 
         ensures that the Agent's initialization process correctly creates
         a copy of the kwargs object to ensure immutability."""
-        test_agent = Agent(**kwargs)
+        test_agent = BaseAgent(**kwargs)
         # Confirm that class is not 
         def recursively_modify_kwargs(obj):
             if isinstance(obj, dict):
@@ -100,8 +100,8 @@ def mock_model():
 
 @pytest.fixture
 def basic_model(mock_model, kwargs):
-    test_agent = Agent(**{**kwargs, 'model': mock_model})
-    test_agent_2 = Agent(mock_model, 'test_agent_2', capacity={'test_currency': 2})
+    test_agent = BaseAgent(**{**kwargs, 'model': mock_model})
+    test_agent_2 = BaseAgent(mock_model, 'test_agent_2', capacity={'test_currency': 2})
     mock_model.agents = {
         'test_agent': test_agent, 
         'test_agent_2': test_agent_2
@@ -111,7 +111,7 @@ def basic_model(mock_model, kwargs):
 class TestAgentRegister:
     def test_agent_register_empty(self):
         """Confirm that all attributes set correctly when no kwargs passed"""
-        test_agent = Agent(object(), 'test_agent')
+        test_agent = BaseAgent(object(), 'test_agent')
         assert test_agent.registered == False
         test_agent.register()
         assert test_agent.registered == True
@@ -228,7 +228,7 @@ def mock_model_with_currencies(mock_model):
 class TestAgentView:
     def test_agent_view_empty(self, mock_model_with_currencies):
         """Confirm that view returns empty dict if no storage or capacity"""
-        test_agent = Agent(mock_model_with_currencies, 'test_agent')
+        test_agent = BaseAgent(mock_model_with_currencies, 'test_agent')
         test_agent.register()
         assert test_agent.view('test_currency_1') == {'test_currency_1': 0}
         assert test_agent.view('test_currency_2') == {'test_currency_2': 0}
@@ -236,7 +236,7 @@ class TestAgentView:
 
     def test_agent_view_full(self, mock_model_with_currencies):
         """Confirm view returns correct values for currency or currency class"""
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies, 
             'test_agent',
             storage={'test_currency_1': 1, 'test_currency_2': 2},
@@ -248,7 +248,7 @@ class TestAgentView:
 
     def test_agent_view_error(self, mock_model_with_currencies):
         """Confirm that error is raised if view currency not in model"""
-        test_agent = Agent(mock_model_with_currencies, 'test_agent')
+        test_agent = BaseAgent(mock_model_with_currencies, 'test_agent')
         with pytest.raises(KeyError):
             test_agent.view('test_currency_3')
 
@@ -336,7 +336,7 @@ class TestAgentSave:
 class TestAgentIncrement:
     def test_agent_increment_positive(self, mock_model_with_currencies):
         """Test that increment correctly increments currencies"""
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies, 
             'test_agent',
             storage={'test_currency_1': 1},
@@ -359,7 +359,7 @@ class TestAgentIncrement:
 
     def test_agent_increment_negative(self, mock_model_with_currencies):
         """Test that increment correctly decrements currencies"""
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies, 
             'test_agent',
             storage={'test_currency_1': 2, 'test_currency_2': 1},
@@ -466,7 +466,7 @@ class TestAgentGetFlowValue:
 
 class TestAgentProcessFlow:
     def test_process_flow_influx(self, mock_model_with_currencies):
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies,
             'test_agent',
             flows={
@@ -484,7 +484,7 @@ class TestAgentProcessFlow:
                 }
             }
         )
-        test_agent_2 = Agent(
+        test_agent_2 = BaseAgent(
             mock_model_with_currencies,
             'test_agent_2',
             capacity={'test_currency_1': 2, 'test_currency_2': 2},
@@ -505,7 +505,7 @@ class TestAgentProcessFlow:
         assert influx == {'test_currency_1': 1}
 
     def test_process_flow_deprive(self, mock_model_with_currencies):
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies,
             'test_agent',
             amount=5,
@@ -519,7 +519,7 @@ class TestAgentProcessFlow:
                 },
             }
         )
-        test_agent_2 = Agent(
+        test_agent_2 = BaseAgent(
             mock_model_with_currencies,
             'test_agent_2',
             capacity={'test_currency_1': 2},
@@ -572,7 +572,7 @@ class TestAgentProcessFlow:
 
 class TestAgentStep:
     def test_agent_step_empty(self, basic_model):
-        test_agent = Agent(basic_model, 'test_agent')
+        test_agent = BaseAgent(basic_model, 'test_agent')
         assert not test_agent.registered
         test_agent.step()
         assert test_agent.registered
@@ -589,7 +589,7 @@ class TestAgentStep:
         assert test_agent.records['active'] == [1, 1]
 
     def test_agent_step_threshold(self, mock_model_with_currencies):
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies,
             'test_agent',
             thresholds={'test_currency_1': {
@@ -599,7 +599,7 @@ class TestAgentStep:
             }},
             flows={'in': {'test_currency_1': {'connections': ['test_structure']}}},
         )
-        test_structure = Agent(
+        test_structure = BaseAgent(
             mock_model_with_currencies,
             'test_structure',
             capacity={'test_currency_1': 10, 'test_currency_2': 10},
@@ -630,7 +630,7 @@ class TestAgentStep:
         assert test_agent.attributes['age'] == 2
 
     def test_agent_step_flows(self, mock_model_with_currencies):
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies,
             'test_agent',
             flows={
@@ -648,7 +648,7 @@ class TestAgentStep:
                 }
             }
         )
-        test_structure = Agent(
+        test_structure = BaseAgent(
             mock_model_with_currencies,
             'test_structure',
             capacity={'test_currency_1': 10, 'test_currency_2': 10},
@@ -672,7 +672,7 @@ class TestAgentStep:
         assert test_structure.storage['test_currency_2'] == 6.5
 
     def test_agent_step_multi_connections(self, mock_model_with_currencies):
-        test_agent = Agent(
+        test_agent = BaseAgent(
             mock_model_with_currencies,
             'test_agent',
             flows={
@@ -684,13 +684,13 @@ class TestAgentStep:
                 },
             }
         )
-        test_structure_1 = Agent(
+        test_structure_1 = BaseAgent(
             mock_model_with_currencies,
             'test_structure_1',
             capacity={'test_currency_1': 10},
             storage={'test_currency_1': 5},
         )
-        test_structure_2 = Agent(
+        test_structure_2 = BaseAgent(
             mock_model_with_currencies,
             'test_structure_2',
             capacity={'test_currency_1': 10},
@@ -727,7 +727,7 @@ class TestAgentStep:
 
 class TestAgentKill:
     def test_agent_kill(self, basic_model):
-        test_agent = Agent(basic_model, 'test_agent', amount=2)
+        test_agent = BaseAgent(basic_model, 'test_agent', amount=2)
         basic_model.agents = {'test_agent': test_agent}
         test_agent.register()
         test_agent.kill('test_reason', 1)

@@ -1,5 +1,5 @@
 import datetime
-from ..agent_model.Agent import SunAgent
+from ..agent_model.agents import SunAgent
 
 class MockModel:
     time = datetime.datetime(1900, 1, 1, 0)

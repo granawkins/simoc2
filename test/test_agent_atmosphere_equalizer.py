@@ -1,5 +1,5 @@
 import pytest
-from ..agent_model.Agent import AtmosphereEqualizerAgent
+from ..agent_model.agents import AtmosphereEqualizerAgent
 from ..agent_model.util import get_default_currency_data
 
 class MockAgent:
