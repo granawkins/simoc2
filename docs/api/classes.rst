@@ -2,11 +2,6 @@
 Classes API Reference
 ====================
 
-.. _agent-model:
-
-AgentModel
-==========
-
 .. autoclass:: simoc_abm.agent_model.AgentModel
-    :members: __init__, from_config
+    :members: __init__, add_currency, add_agent, from_config, step, run, get_records, save
 
