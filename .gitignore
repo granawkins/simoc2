@@ -1,3 +1,5 @@
 .ipynb_checkpoints/
 *__pycache__/
 test/v1_simdata/simoc-simdata*
+
+docs/_build/*
