@@ -1,7 +1,7 @@
 import json, gzip
 import functools
 import numpy as np
-from agent_model import Model
+from simoc_abm import AgentModel
 import matplotlib.pyplot as plt
 
 def lpe(predictions, targets):
@@ -32,7 +32,7 @@ def compare_agent(stem, agent, i=None, j=None, ncols=None, _cache={}):
     if stem not in _cache:
         with open(f'data_files/config_{stem}.json') as f:
             config = json.load(f)
-        model = Model.from_config(**config, record_initial_state=False)
+        model = AgentModel.from_config(**config, record_initial_state=False)
         model.run()
         records = model.get_records()
         simdata = load_simdata(stem)

@@ -2,8 +2,8 @@ import copy
 import datetime
 import pytest
 import numpy as np
-from ..agent_model.agents import PlantAgent, BaseAgent
-from ..agent_model.util import get_default_currency_data, get_default_agent_data
+from ..simoc_abm.agents import PlantAgent, BaseAgent
+from ..simoc_abm.util import get_default_currency_data, get_default_agent_data
 
 @pytest.fixture
 def basic_kwargs():
@@ -133,7 +133,7 @@ class TestAgentPlant:
         """
         - calculate growth rate array correctly
         - calculate max_growth correctly
-        - intitialize cache in Model
+        - intitialize cache in AgentModel
         """
         plant_agent = basic_model.agents['test_plant']
         plant_agent.register()

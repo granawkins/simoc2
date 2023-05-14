@@ -1,7 +1,7 @@
 import pytest
 import datetime
 import numpy as np
-from ..agent_model.agents import LampAgent
+from ..simoc_abm.agents import LampAgent
 
 class MockModel:
     agents = {}

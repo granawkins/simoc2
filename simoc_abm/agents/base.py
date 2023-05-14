@@ -50,7 +50,7 @@ class BaseAgent:
         self.records = {}
 
     def register(self, record_initial_state=False):
-        """Check and setup agent after all agents have been added to Model.
+        """Check and setup agent after all agents have been added to AgentModel.
         
         Args:
             record_initial_state (bool): Whether to include a value for 

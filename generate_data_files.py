@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from agent_model.util import load_data_file, get_default_currency_data
+from simoc_abm.util import load_data_file, get_default_currency_data
 
 # -----------------
 # UPDATE AGENT DESC

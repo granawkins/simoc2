@@ -12,7 +12,7 @@ FLOATING_POINT_PRECISION = 6
 DEFAULT_PRIORITIES = ["structures", "storage", "power_generation", "inhabitants",
                       "eclss", "plants"]
 
-class Model:
+class AgentModel:
     
     floating_point_precision = FLOATING_POINT_PRECISION
     time_unit = DEFAULT_TIME_UNIT

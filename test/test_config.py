@@ -2,8 +2,8 @@ import gzip, json
 import urllib.request
 from pathlib import Path
 import pytest
-from ..agent_model.Model import Model
-from ..agent_model.util import load_data_file
+from ..simoc_abm.agent_model import AgentModel
+from ..simoc_abm.util import load_data_file
 
 config_mapping = {
     '1h': 'simoc-simdata-1-human-preset.json.gz',
@@ -130,7 +130,7 @@ def compare_records(records, stem):
 class TestConfigs:
     def test_config_1h(self):
         config = load_data_file('config_1h.json')
-        model = Model.from_config(**config, record_initial_state=False)
+        model = AgentModel.from_config(**config, record_initial_state=False)
         model.run()
         assert model.elapsed_time.days == 10
         human = model.agents['human']
@@ -160,7 +160,7 @@ class TestConfigs:
     def test_config_1hrad(self):
         stem = '1hrad'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 1
@@ -206,7 +206,7 @@ class TestConfigs:
     def test_config_4h(self):
         stem = '4h'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 4
@@ -245,7 +245,7 @@ class TestConfigs:
     def test_config_4hg(self):
         stem = '4hg'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         # For some reason, the simdata only has 2300 steps instead of 2400
         for i in range(2300):        
             model.step()
@@ -261,7 +261,7 @@ class TestConfigs:
     def test_config_1hg_sam(self):
         stem = '1hg_sam'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 1
@@ -275,7 +275,7 @@ class TestConfigs:
     def test_config_b2_mission1a(self):
         stem = 'b2_mission1a'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 8
@@ -289,7 +289,7 @@ class TestConfigs:
     def test_config_b2_mission1b(self):
         stem = 'b2_mission1b'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 8
@@ -304,7 +304,7 @@ class TestConfigs:
     def test_config_b2_mission2(self):
         stem = 'b2_mission2'
         config = load_data_file(f'config_{stem}.json')
-        model = Model.from_config(**config)
+        model = AgentModel.from_config(**config)
         model.run()
         human = model.agents['human']
         assert human.active == 8

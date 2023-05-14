@@ -6,13 +6,13 @@ from unittest.mock import Mock
 import pytest
 import numpy as np
 
-from ..agent_model.Model import (DEFAULT_START_TIME,
+from ..simoc_abm.agent_model import (DEFAULT_START_TIME,
                                  DEFAULT_LOCATION,
                                  DEFAULT_PRIORITIES,
-                                 Model, 
+                                 AgentModel, 
                                  Scheduler)
-from ..agent_model.agents import BaseAgent
-from ..agent_model.util import get_default_agent_data
+from ..simoc_abm.agents import BaseAgent
+from ..simoc_abm.util import get_default_agent_data
 
 class MockModel:
     def __init__(self, seed=1000):
@@ -98,7 +98,7 @@ def model_kwargs():
 
 class TestModel:
     def test_model_init_basic(self):
-        test_model = Model()
+        test_model = AgentModel()
         assert test_model.termination == []
         assert test_model.location == DEFAULT_LOCATION
         assert test_model.priorities == DEFAULT_PRIORITIES
@@ -117,7 +117,7 @@ class TestModel:
     def test_model_init_complex(self, model_kwargs):
         model_kwargs['elapsed_time'] = 42
         model_kwargs['step_num'] = 100
-        test_model = Model(**model_kwargs)
+        test_model = AgentModel(**model_kwargs)
         assert test_model.termination == model_kwargs['termination']
         assert test_model.location == model_kwargs['location']
         assert test_model.priorities == model_kwargs['priorities']
@@ -129,7 +129,7 @@ class TestModel:
         assert test_model.termination_reason == 'test_termination'
 
     def test_model_add_agent(self, model_kwargs):
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         test_agent = object()
         model.add_agent('test_agent_id', test_agent)
         with pytest.raises(ValueError):
@@ -137,7 +137,7 @@ class TestModel:
         assert model.agents == {'test_agent_id': test_agent}
 
     def test_model_add_currency(self, model_kwargs):
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         model.add_currency('test_currency_id', {})
         with pytest.raises(ValueError):
             model.add_currency('test_currency_id', {})
@@ -145,7 +145,7 @@ class TestModel:
 
     def test_model_register(self, model_kwargs):
         # With record initial state
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         test_agent = Mock()
         model.add_agent('test_agent', test_agent)
         model.register(record_initial_state=True)
@@ -156,7 +156,7 @@ class TestModel:
         assert model.registered
 
         # Without record initial state
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         test_agent = Mock()
         model.add_agent('test_agent', test_agent)
         model.register(record_initial_state=False)
@@ -167,7 +167,7 @@ class TestModel:
         agents = {'o2_storage': {'description': 'test_description'},
                   'test_agent': {'capacity': {'test_currency': 0}, 'storage': {'test_currency': 0}}}
         currencies = {'test_currency': {'description': 'test_description'}}
-        model = Model.from_config(agents, currencies, **model_kwargs)
+        model = AgentModel.from_config(agents, currencies, **model_kwargs)
         assert list(model.agents.keys()) == ['o2_storage', 'test_agent']
         assert 'test_currency' in model.currencies
         assert model.registered
@@ -182,18 +182,18 @@ class TestModel:
 
         # Check that loaded models (step_num != 0) don't record initial state
         model_kwargs['step_num'] = 1
-        model = Model.from_config(agents, currencies, **model_kwargs)
+        model = AgentModel.from_config(agents, currencies, **model_kwargs)
         assert model.registered
         assert len(model.records['time']) == 0
 
     def test_model_time(self, model_kwargs):
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         assert model.time == model.start_time
         model.elapsed_time = datetime.timedelta(seconds=42)
         assert model.time == model.start_time + model.elapsed_time
 
     def test_model_step(self, model_kwargs):
-        model = Model(**model_kwargs)
+        model = AgentModel(**model_kwargs)
         model.step()
         assert model.registered
         assert model.step_num == 1
@@ -205,7 +205,7 @@ class TestModel:
         for (unit, value) in (('day', 2), ('hour', 30)):
             model_kwargs['termination'][0]['unit'] = unit
             model_kwargs['termination'][0]['value'] = value
-            model = Model(**model_kwargs)
+            model = AgentModel(**model_kwargs)
             expected_steps = value * 24 if unit == 'day' else value
             for _ in range(expected_steps - 1):
                 model.step()
@@ -215,7 +215,7 @@ class TestModel:
             assert model.termination_reason == 'time'
 
     def test_model_get_records(self, model_kwargs):
-        model = Model.from_config({'o2_storage': {}}, {}, **model_kwargs)
+        model = AgentModel.from_config({'o2_storage': {}}, {}, **model_kwargs)
         model.step()
         # Basic records
         records = model.get_records()        
@@ -238,7 +238,7 @@ class TestModel:
         assert len(model.agents['o2_storage'].records['active']) == 0
 
     def test_model_save(self, model_kwargs):
-        model = Model.from_config({'o2_storage': {}}, {}, **model_kwargs)
+        model = AgentModel.from_config({'o2_storage': {}}, {}, **model_kwargs)
         model.step()
         saved = model.save()
         assert 'records' not in saved
@@ -246,7 +246,7 @@ class TestModel:
         assert True
         # Re-load
         # TODO: Test save/load in depth
-        model = Model.from_config(**saved)
+        model = AgentModel.from_config(**saved)
         model.step()
         assert True
         # Include records

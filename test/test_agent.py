@@ -1,8 +1,8 @@
 import copy
 import datetime
 import pytest
-from ..agent_model.agents import BaseAgent
-from ..agent_model.util import get_default_currency_data
+from ..simoc_abm.agents import BaseAgent
+from ..simoc_abm.util import get_default_currency_data
 
 @pytest.fixture
 def kwargs():

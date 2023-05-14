@@ -2,7 +2,7 @@ import pytest
 import datetime
 from copy import deepcopy
 
-from ..agent_model.util import (load_data_file, 
+from ..simoc_abm.util import (load_data_file, 
                                 get_default_agent_data,
                                 get_default_currency_data,
                                 merge_json,
