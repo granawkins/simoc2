@@ -93,6 +93,11 @@ def update_desc(agent_type, desc):
         else:
             new_desc['properties'][char_type] = {k: v for k, v in char.items() if k != 'type'}
 
+    categories = list(new_desc.keys())
+    for cat in categories:
+        if not new_desc[cat]:
+            del new_desc[cat]
+
     return new_desc
 
 # MAKE NEW DATA FILES
@@ -244,7 +249,6 @@ for config_name in config_names:
                 elif new_name == 'co2_removal_SAWD':
                     criteria = new_agent_desc['co2_removal_SAWD']['flows']['in']['co2']['criteria']
                     criteria[0]['value'] = 0.0025
-                    from IPython import embed; embed()
                     reformatted_agent['flows'] = {'in': {'co2': {'criteria': criteria}}}
 
             reformatted_config['agents'][new_name] = reformatted_agent

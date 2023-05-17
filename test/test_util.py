@@ -26,7 +26,7 @@ class TestDataFilesHandling:
     
     def test_get_default_agent_data(self):
         wheat_data = get_default_agent_data('wheat')
-        assert all([k in wheat_data for k in ['amount', 'storage', 'properties', 'storage', 'flows']])
+        assert all([k in wheat_data for k in ['amount', 'properties', 'flows']])
     
     def test_get_default_currency_data(self):
         currency_data = get_default_currency_data()

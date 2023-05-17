@@ -266,7 +266,7 @@ class TestAgentPlantStep:
 
     def test_agent_plant_step_delay(self, wheat_model, wheat_kwargs):
         wheat_model.time = datetime.datetime(2020, 1, 1, 12)
-        wheat_kwargs['attributes']['delay_start'] = 2
+        wheat_kwargs['attributes'] = {'delay_start': 2}
         wheat_model.agents['wheat'] = PlantAgent(wheat_model, 'wheat', **wheat_kwargs)
         wheat_agent = wheat_model.agents['wheat']
         wheat_model.register()

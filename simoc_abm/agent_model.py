@@ -193,6 +193,9 @@ class AgentModel:
 
             agent = build_from_class(model, **agent_data)
             model.add_agent(agent_id, agent)
+        # Prune unused currencies from capacity
+        for agent in model.agents.values():
+            agent.capacity = {k: v for k, v in agent.capacity.items() if k in currencies_in_use}
 
         # Merge user currencies with default currencies
         currencies = {**get_default_currency_data(), **currencies}

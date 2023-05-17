@@ -17,6 +17,11 @@ def plot_agent(data, agent, category, exclude=[], include=[], i=None, j=None, ax
     """
     i = i if i is not None else 0
     j = j if j is not None else data['step_num'][-1]
+    if ax is None:
+        ax = plt
+        ax.title(f'{agent} {category}', fontsize=10)
+    else:
+        ax.set_title(f'{agent} {category}', fontsize=10)
     ax = ax if ax is not None else plt
     if category == 'flows':
         path = [agent, 'flows', '*', '*', 'SUM', f'{i}:{j}']
@@ -26,7 +31,8 @@ def plot_agent(data, agent, category, exclude=[], include=[], i=None, j=None, ax
                 continue
             for currency, values in flows[direction].items():
                 label = f'{direction}_{currency}'
-                if currency in exclude or label in exclude:
+                if ((currency in exclude or label in exclude) or
+                    (include and currency not in include and label not in include)):
                     continue
                 ax.plot(range(i, j), values, label=label)
     elif category in {'storage', 'attributes'}:

@@ -118,9 +118,9 @@ class TestAgentRegister:
         assert test_agent.attributes == {'age': 0}
         assert test_agent.records['active'] == []
         assert test_agent.records['cause_of_death'] == None
-        assert test_agent.records['storage'] == {}
+        assert 'storage' not in test_agent.records
         assert test_agent.records['attributes'] == {'age': []}
-        assert test_agent.records['flows'] == {'in': {}, 'out': {}}
+        assert 'flows' not in test_agent.records
 
     def test_agent_register_full_missing_connection(self, basic_model):
         """Confirm that an error is raised if connection agent not in model"""
@@ -579,9 +579,7 @@ class TestAgentStep:
         assert test_agent.records == {
             'active': [1],
             'cause_of_death': None,
-            'storage': {},
             'attributes': {'age': [1]},
-            'flows': {'in': {}, 'out': {}}
         }
         test_agent.step()
         assert test_agent.attributes['age'] == 2

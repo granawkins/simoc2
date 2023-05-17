@@ -1,7 +1,6 @@
 {
     "human": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 82.0,
@@ -110,7 +109,6 @@
                 }
             }
         },
-        "capacity": {},
         "thresholds": {
             "o2": {
                 "path": "in_o2_ratio",
@@ -125,13 +123,10 @@
                 "connections": "all"
             }
         },
-        "attributes": {},
-        "description": "",
         "agent_class": "inhabitants"
     },
     "solid_waste_aerobic_bioreactor": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 150,
@@ -252,15 +247,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "First stage recovery of wastewater, using microbial degradation. Isolates nutrients from urine.",
         "agent_class": "eclss"
     },
     "urine_recycling_processor_VCD": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 193.3,
@@ -335,15 +326,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "First stage recovery of urine, both that captured directly and as isolated from wastewater.",
         "agent_class": "eclss"
     },
     "multifiltration_purifier_post_treatment": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 114.6,
@@ -403,15 +390,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Second stage recovery of urine, producing relatively clean water following VCD.",
         "agent_class": "eclss"
     },
     "oxygen_generation_SFWE": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 83.43,
@@ -484,15 +467,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Generates oxygen through electrolysis of water.",
         "agent_class": "eclss"
     },
     "co2_reduction_sabatier": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 47.9,
@@ -587,15 +566,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Reduces carbon dioxide without requiring venting.",
         "agent_class": "eclss"
     },
     "co2_removal_SAWD": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 137.35,
@@ -658,15 +633,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Moves carbon dioxide from the habitat atmosphere to co2_storage.",
         "agent_class": "eclss"
     },
     "co2_makeup_valve": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 10,
@@ -715,15 +686,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Vents carbon dioxide from co2_storage into the habitat atmosphere.",
         "agent_class": "eclss"
     },
     "particulate_removal_TCCS": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 137.35,
@@ -769,15 +736,11 @@
             },
             "out": {}
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Removes potentially hazardous trace contaminants.",
         "agent_class": "eclss"
     },
     "dehumidifier": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 35.0,
@@ -844,15 +807,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Converts free water vapor into potable water.",
         "agent_class": "eclss"
     },
     "ch4_removal_agent": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 20.0,
@@ -899,16 +858,11 @@
             },
             "out": {}
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Vents methane from the habitat, removing it from the system.",
         "agent_class": "eclss"
     },
     "o2_makeup_valve": {
         "amount": 1,
-        "storage": {},
-        "properties": {},
         "flows": {
             "in": {
                 "o2": {
@@ -945,16 +899,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Add O2 gas from o2_storage back into connected structure",
         "agent_class": "eclss"
     },
     "o2_storage": {
         "amount": 1,
-        "storage": {},
-        "properties": {},
         "flows": {
             "in": {},
             "out": {}
@@ -962,14 +911,11 @@
         "capacity": {
             "o2": 100000
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "Pressurized O2 storage",
         "agent_class": "eclss"
     },
     "rice": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.4,
@@ -1179,14 +1125,10 @@
         "capacity": {
             "biomass": 1.1016
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "wheat": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 3.53,
@@ -1396,14 +1338,10 @@
         "capacity": {
             "biomass": 3.334464
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "cabbage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -1613,14 +1551,10 @@
         "capacity": {
             "biomass": 0.46308
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "chard": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -1830,14 +1764,10 @@
         "capacity": {
             "biomass": 0.39204
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "celery": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -2047,14 +1977,10 @@
         "capacity": {
             "biomass": 0.6966
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "lettuce": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.7,
@@ -2264,14 +2190,10 @@
         "capacity": {
             "biomass": 0.19944
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "spinach": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -2481,14 +2403,10 @@
         "capacity": {
             "biomass": 0.17712
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "dry_bean": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.01,
@@ -2698,14 +2616,10 @@
         "capacity": {
             "biomass": 0.567168
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "peanut": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.13,
@@ -2915,14 +2829,10 @@
         "capacity": {
             "biomass": 0.6384
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "soybean": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.54,
@@ -3132,14 +3042,10 @@
         "capacity": {
             "biomass": 0.67608
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "strawberry": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.9,
@@ -3349,14 +3255,10 @@
         "capacity": {
             "biomass": 1.08144
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "tomato": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.61,
@@ -3566,14 +3468,10 @@
         "capacity": {
             "biomass": 1.693368
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "green_onion": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.78,
@@ -3783,14 +3681,10 @@
         "capacity": {
             "biomass": 0.4044
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "onion": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.78,
@@ -4000,14 +3894,10 @@
         "capacity": {
             "biomass": 0.456
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "pea": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.13,
@@ -4217,14 +4107,10 @@
         "capacity": {
             "biomass": 1.6308
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "pepper": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.61,
@@ -4434,14 +4320,10 @@
         "capacity": {
             "biomass": 1.59528
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "snap_bean": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.54,
@@ -4651,14 +4533,10 @@
         "capacity": {
             "biomass": 2.04408
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "radish": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -4868,14 +4746,10 @@
         "capacity": {
             "biomass": 0.2226
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "red_beet": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.72,
@@ -5085,14 +4959,10 @@
         "capacity": {
             "biomass": 0.307344
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "carrot": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.78,
@@ -5302,14 +5172,10 @@
         "capacity": {
             "biomass": 0.909
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "sweet_potato": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.17,
@@ -5519,14 +5385,10 @@
         "capacity": {
             "biomass": 2.58264
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "white_potato": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.78,
@@ -5736,14 +5598,10 @@
         "capacity": {
             "biomass": 2.79468
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "sorghum": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 3.53,
@@ -5953,14 +5811,10 @@
         "capacity": {
             "biomass": 3.334464
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "vegetables": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 0.71,
@@ -6170,14 +6024,10 @@
         "capacity": {
             "biomass": 0.24864
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "corn": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 3.53,
@@ -6387,14 +6237,10 @@
         "capacity": {
             "biomass": 3.334464
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "orchard": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1.08,
@@ -6604,14 +6450,10 @@
         "capacity": {
             "biomass": 0.880992
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "plants"
     },
     "crew_habitat_sam": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "habitat"
@@ -6648,14 +6490,11 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The crew module of SAM, the Space Analog of the Moon and Mars at Biosphere 2 in Oracle, Arizona",
         "agent_class": "structures"
     },
     "crew_habitat_small": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "habitat"
@@ -6692,14 +6531,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "crew_habitat_medium": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "habitat"
@@ -6736,14 +6571,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "crew_habitat_large": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "habitat"
@@ -6780,14 +6611,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "greenhouse_sam": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "greenhouse"
@@ -6824,14 +6651,11 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The greenhouse of SAM, the Space Analog of the Moon and Mars at Biosphere 2 in Oracle, Arizona",
         "agent_class": "structures"
     },
     "greenhouse_small": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "greenhouse"
@@ -6868,14 +6692,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "greenhouse_medium": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "greenhouse"
@@ -6912,14 +6732,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "greenhouse_large": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "greenhouse"
@@ -6956,14 +6772,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "airlock": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 0,
@@ -6989,16 +6801,10 @@
             },
             "out": {}
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "atmosphere_equalizer": {
         "amount": 1,
-        "storage": {},
-        "properties": {},
         "flows": {
             "in": {
                 "atmosphere": {
@@ -7035,15 +6841,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "Balances the atmosphere elements of habitat & greenhouse every step.",
         "agent_class": "structures"
     },
     "lamp": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 5,
@@ -7088,14 +6890,10 @@
         "capacity": {
             "par": 10000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "structures"
     },
     "b2_sun": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "par_baseline": {
                 "value": 1,
@@ -7123,14 +6921,11 @@
         "capacity": {
             "par": 5
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "Sunlight available to plants in the greenhouse_b2",
         "agent_class": "structures"
     },
     "greenhouse_b2": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "soil": {
                 "value": 1.36,
@@ -7179,14 +6974,11 @@
             "n2": 22.0125,
             "co2": 22.0125
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Intensive Agriculture Biome at Biosphere 2",
         "agent_class": "structures"
     },
     "crew_habitat_b2": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "soil": {
                 "value": 0.002,
@@ -7213,14 +7005,11 @@
             "n2": 13.74625,
             "co2": 13.74625
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Crew Habitat at Biosphere 2",
         "agent_class": "structures"
     },
     "rainforest_biome": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "soil": {
                 "value": 3.0,
@@ -7269,14 +7058,11 @@
             "n2": 18.0625,
             "co2": 18.0625
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Rainforest Biome at Biosphere 2",
         "agent_class": "structures"
     },
     "desert_biome": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "soil": {
                 "value": 2.857142857142857,
@@ -7325,14 +7111,11 @@
             "n2": 15.714285714285714,
             "co2": 15.714285714285714
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Desert Biome at Biosphere 2",
         "agent_class": "structures"
     },
     "west_lung": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "volume": {
                 "value": 8.333333333333334,
@@ -7351,14 +7134,11 @@
             "n2": 10.416666666666668,
             "co2": 10.416666666666668
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The West Lung at Biosphere 2",
         "agent_class": "structures"
     },
     "south_lung": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "water": {
                 "value": 0.4166666666666667,
@@ -7381,14 +7161,11 @@
             "n2": 10.416666666666668,
             "co2": 10.416666666666668
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The South Lung at Biosphere 2",
         "agent_class": "structures"
     },
     "ocean_biome": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "water": {
                 "value": 3.939745075318656,
@@ -7411,14 +7188,11 @@
             "n2": 20.8,
             "co2": 20.8
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Ocean Biome at Biosphere 2",
         "agent_class": "structures"
     },
     "savannah_biome": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "soil": {
                 "value": 2.4434941967012827,
@@ -7463,14 +7237,11 @@
             "n2": 20.799999999999997,
             "co2": 20.799999999999997
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "The Savannah Biome at Biosphere 2",
         "agent_class": "structures"
     },
     "concrete": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "area": {
                 "value": 1,
@@ -7551,14 +7322,11 @@
             "caco3": 1000,
             "moisture": 1000
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "1 m^2 of exposed carbonating concrete",
         "agent_class": "structures"
     },
     "solar_pv_array_mars": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "power"
@@ -7592,15 +7360,10 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "power_generation"
     },
     "solar_pv_array_moon": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 3.0,
@@ -7631,15 +7394,10 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "power_generation"
     },
     "wind_turbine": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 0,
@@ -7665,15 +7423,10 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "power_generation"
     },
     "radioisotope_generator": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "power"
@@ -7702,15 +7455,10 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "power_generation"
     },
     "b2_power_gen": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "category": {
                 "value": "power"
@@ -7731,15 +7479,11 @@
                 }
             }
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
         "description": "The Biosphere 2 power generation facility",
         "agent_class": "power_generation"
     },
     "radio": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 0,
@@ -7765,15 +7509,10 @@
             },
             "out": {}
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "communication"
     },
     "lab_equipment": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 0,
@@ -7799,15 +7538,10 @@
             },
             "out": {}
         },
-        "capacity": {},
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "communication"
     },
     "air_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 4348.5,
@@ -7830,14 +7564,10 @@
             "h2": 1000,
             "h2o": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "water_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 27.6691,
@@ -7858,14 +7588,10 @@
             "feces": 4000,
             "treated": 4000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "nutrient_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 6.35029,
@@ -7885,14 +7611,10 @@
             "fertilizer": 1000,
             "waste": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "ration_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 100,
@@ -7910,14 +7632,10 @@
         "capacity": {
             "ration": 10000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "food_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 100,
@@ -7960,14 +7678,10 @@
             "corn": 10000,
             "orchard": 10000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "power_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 226.796,
@@ -7985,14 +7699,10 @@
         "capacity": {
             "kwh": 1000
         },
-        "thresholds": {},
-        "attributes": {},
-        "description": "",
         "agent_class": "storage"
     },
     "co2_storage": {
         "amount": 1,
-        "storage": {},
         "properties": {
             "mass": {
                 "value": 1000,
@@ -8010,8 +7720,6 @@
         "capacity": {
             "co2": 10000
         },
-        "thresholds": {},
-        "attributes": {},
         "description": "Stores co2 from co2_removal_sawd, released by co2_makeup_valve",
         "agent_class": "storage"
     }

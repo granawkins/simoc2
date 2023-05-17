@@ -165,7 +165,8 @@ class TestModel:
     
     def test_model_from_config(self, model_kwargs):
         agents = {'o2_storage': {'description': 'test_description'},
-                  'test_agent': {'capacity': {'test_currency': 0}, 'storage': {'test_currency': 0}}}
+                  'test_agent': {'capacity': {'test_currency': 0}, 'storage': {'test_currency': 0}, 
+                                 'flows': {'in': {'o2': {'value': 0, 'connections': ['o2_storage']}}}}}
         currencies = {'test_currency': {'description': 'test_description'}}
         model = AgentModel.from_config(agents, currencies, **model_kwargs)
         assert list(model.agents.keys()) == ['o2_storage', 'test_agent']

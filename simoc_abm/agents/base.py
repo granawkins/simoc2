@@ -104,14 +104,17 @@ class BaseAgent:
         self.records = {
             'active': [] if not record_initial_state else [self.active],
             'cause_of_death': self.cause_of_death,
-            'storage': {currency: [] if not record_initial_state 
-                        else [self.storage.get(currency, 0)] 
-                        for currency in self.capacity},
-            'attributes': {attr: [] if not record_initial_state 
-                           else [self.attributes[attr]] 
-                           for attr in self.attributes},
-            'flows': flow_records,
         }
+        if self.capacity:
+            self.records['storage'] = {currency: [] if not record_initial_state 
+                                       else [self.storage.get(currency, 0)] 
+                                       for currency in self.capacity}
+        if self.attributes:
+            self.records['attributes'] = {attr: [] if not record_initial_state 
+                                          else [self.attributes[attr]] 
+                                          for attr in self.attributes}
+        if flow_records['in'] or flow_records['out']:
+            self.records['flows'] = flow_records
         self.registered = True
 
     def register_flow(self, direction, currency, flow):

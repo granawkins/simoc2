@@ -75,14 +75,14 @@ def compare_records(records, stem):
         report = {}
         
         # Compare storage
-        if record['storage']:
+        if 'storage' in record:
             report['storage'] = {}
             for currency, predictions in record['storage'].items():
                 targets = reference['storage'][currency]
                 report['storage'][currency] = lpe(predictions, targets)
         
         # Compare flows
-        if record['flows']:
+        if 'flows' in record:
             if agent_id == 'atmosphere_equalizer':
                 continue  # Not part of old records
             report['flows'] = {}
@@ -98,7 +98,7 @@ def compare_records(records, stem):
                     report['flows'][f'{direction}_{currency}'] = mean_mape
         
         # Compare attributes
-        if record['attributes']:
+        if 'attributes' in record:
             report['attributes'] = {}
             for attribute, predictions in record['attributes'].items():
                 if 'growth' in reference and attribute in reference['growth']:
