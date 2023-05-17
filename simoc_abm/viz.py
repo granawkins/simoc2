@@ -23,6 +23,10 @@ def plot_agent(data, agent, category, exclude=[], include=[], i=None, j=None, ax
     else:
         ax.set_title(f'{agent} {category}', fontsize=10)
     ax = ax if ax is not None else plt
+    if category == 'active':
+        path = [agent, 'active', f'{i}:{j}']
+        active = parse_data(data['agents'], path)
+        ax.plot(range(i, j), active, label='active')
     if category == 'flows':
         path = [agent, 'flows', '*', '*', 'SUM', f'{i}:{j}']
         flows = parse_data(data['agents'], path)
