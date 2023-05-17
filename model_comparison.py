@@ -30,7 +30,7 @@ def load_simdata(stem):
 substitute_names = {'human': 'human_agent'}
 def compare_agent(stem, agent, i=None, j=None, ncols=None, _cache={}):
     if stem not in _cache:
-        with open(f'data_files/config_{stem}.json') as f:
+        with open(f'simoc_abm/data_files/config_{stem}.json') as f:
             config = json.load(f)
         model = AgentModel.from_config(**config, record_initial_state=False)
         model.run()

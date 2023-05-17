@@ -168,7 +168,7 @@ for dir, flows in new_agent_desc['dehumidifier']['flows'].items():
 
 
 # SAVE NEW DATA FILES
-with open('data_files/agent_desc.json', 'w') as f:
+with open('simoc_abm/data_files/agent_desc.json', 'w') as f:
     json.dump(new_agent_desc, f, indent=4)
 
 # ---------------------
@@ -248,5 +248,5 @@ for config_name in config_names:
                     reformatted_agent['flows'] = {'in': {'co2': {'criteria': criteria}}}
 
             reformatted_config['agents'][new_name] = reformatted_agent
-    with open(f'data_files/config_{config_name}.json', 'w') as f:
+    with open(f'simoc_abm/data_files/config_{config_name}.json', 'w') as f:
         json.dump(reformatted_config, f, indent=4)

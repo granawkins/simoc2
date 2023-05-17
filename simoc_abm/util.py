@@ -7,7 +7,7 @@ def load_data_file(fname, data_dir=None):
     """Load data file from data directory."""
     if data_dir is None:
         # Get the absolute path of the directory containing the current script
-        script_dir = Path(__file__).resolve().parent.parent
+        script_dir = Path(__file__).resolve().parent
         data_dir = script_dir / 'data_files'
     else:
         data_dir = Path(data_dir)
