@@ -65,6 +65,7 @@ def recursively_clear_lists(r):
         return []
     
 def recursively_check_required_kwargs(given, required):
+    """Compare two dicts and raise ValueError if any keys are missing"""
     for key, value in required.items():
         if key not in given:
             raise ValueError(f'{key} not found in {given}')
@@ -77,14 +78,17 @@ operator_dict = {
     '>=': operator.ge, '<=': operator.le,
     '=': operator.eq, '!=': operator.ne,
 }
-def evaluate_reference(agent, reference):
-    """Evaluate a reference dict and return a boolean
+def evaluate_reference(agent, path, limit, value, connections=None):
+    """Evaluate a reference path against a limit and value.
 
-    Supported path elements:
-        - 'grown': from attributes
-        - 'in_co2_ratio': ratio (0-1) of co2 to total class (atmosphere) from first connected agent
+    :param BaseAgent agent: Agent to evaluate
+    :param str path: Path to evaluate (e.g. 'grown', 'in_co2_ratio')
+    :param str limit: Method of comparison (>, <, >=, <=, =, !=)
+    :param float value: Value to evaluate against
+    :param str connections: Whether test must pass for all connections (all, None)
+
+    :return: (bool) Whether the test passes
     """
-    path, limit, value = reference['path'], reference['limit'], reference['value']
     ref_agent = agent
     # Parse connected agent
     if path.startswith('in_') or path.startswith('out_'):
@@ -95,10 +99,10 @@ def evaluate_reference(agent, reference):
         else:
             currency = remainder
         conns = agent.flows[direction][currency]['connections']
-        updated_reference = {**reference, 'path': remainder}
-        results = (evaluate_reference(agent.model.agents[c], updated_reference) for c in conns)
+        results = (evaluate_reference(agent.model.agents[c], remainder, limit, value, connections) 
+                   for c in conns)
         # Return group eval connections
-        if 'connections' in reference and reference['connections'] == 'all':
+        if connections == 'all':
             return all(results)
         return any(results)
     # Parse field
@@ -185,22 +189,54 @@ def sample_switch(rate, min_value=0, max_value=1, center=0.5, duration=0.5):
     return min_value
 
 def evaluate_growth(agent, mode, params):
+    """Evaluate a growth function for an agent
+
+    Calculates rate based on mode, then passes to sample_<type> function.
+
+    :param BaseAgent agent: Agent to evaluate
+    :param str mode: Mode to evaluate in (daily, lifetime)
+    :param dict params: Parameters for growth function including 'type'
+
+    :return: (float) Value of growth function
+    """
     if mode == 'daily':
         rate = agent.model.time.hour / 24
     elif mode == 'lifetime':
         rate = agent.attributes['age'] / agent.properties['lifetime']['value']
+    growth_type = params.get('type')
+    kwargs = {k: v for k, v in params.items() if k != 'type'}
     growth_func = {
         'norm': sample_norm,
         'sigmoid': sample_sigmoid,
         'clipped': sample_clipped_norm,
         'switch': sample_switch
-    }[params['type']]
-    return growth_func(rate, **{k: v for k, v in params.items() if k != 'type'})
+    }[growth_type]
+    return growth_func(rate, **kwargs)
 
 # WORKING WITH OUTPUTS
 
 def parse_data(data, path):
-    """Recursive function to extract data at path from arbitrary object"""
+    """Recursive function to extract data at path from arbitrary object
+
+    Supported arguments for lists:
+        * ``'*'``: All items
+        * ``int``: Single item at index
+        * ``'i:j'``: Range of items of a list
+
+    Supported arguments for dicts:
+        * ``'*'``: All items
+        * ``'SUM'``: element-wise sum of remaining path of all items
+        * ``'<key>'``: Single item at key
+        * ``'<key>,<key>'``: Multiple items at keys
+
+    For example, to return the total stored mass (atomsphere) of the 
+    greenhouse agent for steps 5-10:
+    ``parse_data(data, ['greenhouse', 'storage', 'SUM', '5:10'])``
+
+    :param dict data: Multi-level dict, e.g. data object returned by AgentModel.get_records
+    :param list path: Path with parsing instructions at each step
+
+    """
     if not data and data != 0:
         return None
     elif len(path) == 0:

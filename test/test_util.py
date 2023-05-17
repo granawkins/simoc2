@@ -125,9 +125,9 @@ class TestEvaluateReference:
             'value': 1
         }
         test_agent_1 = test_model.agents['test_agent_1']
-        assert not evaluate_reference(test_agent_1, reference)
+        assert not evaluate_reference(test_agent_1, **reference)
         test_agent_1.attributes['test_attribute'] = 2
-        assert evaluate_reference(test_agent_1, reference)
+        assert evaluate_reference(test_agent_1, **reference)
 
     def test_evaluate_reference_storage(self, test_model):
         reference = {
@@ -136,9 +136,9 @@ class TestEvaluateReference:
             'value': 1
         }
         test_agent_1 = test_model.agents['test_agent_1']
-        assert not evaluate_reference(test_agent_1, reference)
+        assert not evaluate_reference(test_agent_1, **reference)
         test_agent_1.storage['test_currency_1'] = 2
-        assert evaluate_reference(test_agent_1, reference)
+        assert evaluate_reference(test_agent_1, **reference)
 
     def test_evaluate_reference_ratio(self, test_model):
         reference = {
@@ -147,9 +147,9 @@ class TestEvaluateReference:
             'value': 0.5
         }
         test_agent_1 = test_model.agents['test_agent_1']
-        assert not evaluate_reference(test_agent_1, reference)
+        assert not evaluate_reference(test_agent_1, **reference)
         reference['limit'] = '<'
-        assert evaluate_reference(test_agent_1, reference)
+        assert evaluate_reference(test_agent_1, **reference)
 
     def test_evaluate_reference_connected(self, test_model):
         reference = {
@@ -158,10 +158,10 @@ class TestEvaluateReference:
             'value': 1
         }
         test_agent_1 = test_model.agents['test_agent_1']
-        assert not evaluate_reference(test_agent_1, reference)
+        assert not evaluate_reference(test_agent_1, **reference)
         test_agent_2 = test_model.agents['test_agent_2']
         test_agent_2.storage['test_currency_1'] = 2
-        assert evaluate_reference(test_agent_1, reference)
+        assert evaluate_reference(test_agent_1, **reference)
 
 class TestGrowthFuncs:
     def test_growth_pdf(self):

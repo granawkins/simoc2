@@ -2,6 +2,18 @@ import numpy as np
 from . import BaseAgent
 
 class LampAgent(BaseAgent):
+    """A lamp which provides light to plants
+
+    :ivar list connected_plants: The agent_id's of the plants connected to this lamp
+    :ivar list daily_growth: The daily_growth_factor for each hour of the day; mean=1
+    :ivar dict lamp_configuration: The number of active lamps for each connected plant
+
+    Custom Attributes:
+        * **daily_growth_factor** (float): The factor by which the plant's growth rate is multiplied each day
+        * **par_rate** (float): The rate at which the lamp emits photosynthetically active radiation (PAR)
+        * **photoperiod** (float): The number of hours per day the lamp is on
+
+    """
     default_attributes = {
         'daily_growth_factor': 1,
         'par_rate': 1,
@@ -22,6 +34,7 @@ class LampAgent(BaseAgent):
         self.lamp_configuration = {}
 
     def _update_lamp_attributes(self):
+        """Update the lamp's attributes based on the active connected plants"""
         # Scale the number of lamps to the number of active plants
         lamp_configuration = {p: self.model.agents[p].active 
                               for p in self.connected_plants}
@@ -48,6 +61,10 @@ class LampAgent(BaseAgent):
         self.daily_growth[photo_start:photo_end] = par_rate
 
     def register(self, record_initial_state=False):
+        """Find and record connected plants and initialize lamp attributes
+        
+        Save the agent_id's of all agents which have this lamp in flows.in.par.connections
+        """
         self.connected_plants = []
         for agent_id, agent in self.model.agents.items():
             if ('par' in agent.flows['in'] and 
@@ -60,6 +77,7 @@ class LampAgent(BaseAgent):
         super().register(record_initial_state)
 
     def step(self, dT=1):
+        """Update the lamp attributes based on time of day and active connected plants"""
         if not self.registered:
             self.register()
         self.storage['par'] = 0

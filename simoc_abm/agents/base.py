@@ -5,27 +5,49 @@ from collections import defaultdict
 from ..util import evaluate_reference, evaluate_growth, recursively_clear_lists
 
 class BaseAgent:
+    """Base class for all agents.
+
+    :ivar str agent_id: A unique string
+    :ivar int amount: Starting/Maximum number alive
+    :ivar str description: Plaintext description
+    :ivar str agent_class: Agent class name
+    :ivar dict properties: Static vars, 'volume'
+    :ivar dict capacity: Max storage per currency per individual
+    :ivar dict thresholds: Env. conditions to die
+    :ivar dict flows: Exchanges w/ other agents
+    :ivar str cause_of_death: Reason for death
+    :ivar int active: Current number alive
+    :ivar dict storage: Currencies stored by total amount
+    :ivar dict attributes: Dynamic vars, 'te_factor'
+    :ivar AgentModel model: AgentModel instance
+    :ivar bool registered: Whether agent has been registered
+    :ivar dict records: Agent records    
+    """
+
     # ------------- SETUP  ------------- #
     def __init__(self, model, agent_id, amount=1, description=None, 
                  agent_class=None, properties=None, capacity=None, 
                  thresholds=None, flows=None, cause_of_death=None, active=None, 
                  storage=None, attributes=None):
         """Create an agent with the given parameters.
+
+        This function is intended to save initial state only. All validation
+        and setup should be done in the register() function, after all currencies
+        and agents have been added to model.
         
-        Args:
-            model (AgentModel): AgentModel instance
-            agent_id (str): A unique string
-            amount (int): Starting/Maximum number alive
-            description (str): Plaintext description
-            agent_class (str): Agent class name
-            properties (dict): Static vars, 'volume'
-            capacity (dict): Max storage per currency per individual
-            thresholds (dict): Env. conditions to die
-            flows (dict): Exchanges w/ other agents
-            cause_of_death (str): Reason for death
-            active (int): Current number alive
-            storage (dict): Currencies stored by total amount
-            attributes (dict): Dynamic vars, 'te_factor'
+        :param AgentModel model: AgentModel instance
+        :param str agent_id: A unique string
+        :param int amount: Starting/Maximum number alive
+        :param str description: Plaintext description
+        :param str agent_class: Agent class name
+        :param dict properties: Static vars, 'volume'
+        :param dict capacity: Max storage per currency per individual
+        :param dict thresholds: Env. conditions to die
+        :param dict flows: Exchanges w/ other agents
+        :param str cause_of_death: Reason for death
+        :param int active: Current number alive
+        :param dict storage: Currencies stored by total amount
+        :param dict attributes: Dynamic vars, 'te_factor'
         """
         # -- STATIC
         self.agent_id = agent_id
@@ -50,11 +72,11 @@ class BaseAgent:
         self.records = {}
 
     def register(self, record_initial_state=False):
-        """Check and setup agent after all agents have been added to AgentModel.
+        """Validate inputs and setup agent.
+
+        Called automatically by Agent.step() if self.registered is false. 
         
-        Args:
-            record_initial_state (bool): Whether to include a value for 
-                'step 0'; True for new simulations, false when loading
+        :param bool record_initial_state: Whether to record initial state (i.e. step 0)
         """
         if self.registered:
             return
@@ -93,7 +115,12 @@ class BaseAgent:
         self.registered = True
 
     def register_flow(self, direction, currency, flow):
-        """Check flow, setup attributes and records. Overloadable by subclasses."""
+        """Validate and setup flow.
+        
+        :param str direction: 'in' or 'out'
+        :param str currency: Currency name
+        :param dict flow: Flow dict, see Agent.flows
+        """
         # Check flow fields
         allowed_fields = {'value', 'flow_rate', 'criteria', 'connections', 
                           'deprive', 'weighted', 'requires', 'growth'}
@@ -130,7 +157,12 @@ class BaseAgent:
 
     # ------------- INSPECT ------------- #
     def view(self, view):
-        """Return a dict with storage amount for single currency or all of a class"""
+        """Return a dict with storage amount for single currency or all of a class
+
+        :param str view: Currency or currency class name.
+
+        :return: Dict with currency or class currencies as keys and storage amount as values. Includes all currencies for which the agent has capacity.
+        """
         currency_type = self.model.currencies[view]['currency_type']
         if currency_type == 'currency':
             if view not in self.storage:
@@ -151,7 +183,16 @@ class BaseAgent:
         return output
 
     def get_records(self, static=False, clear_cache=False):
-        """Return records dict and optionally clear cache"""
+        """Return records dict and optionally clear cache
+        
+        By default, only return fields which change over time. If static is True,
+        return non-changing fields as well under the key 'static'. 
+
+        :param bool static: Whether to return non-changing fields
+        :param bool clear_cache: Whether to clear the records cache
+
+        :return: Records dict
+        """
         output = deepcopy(self.records)
         if static:
             static_records = self.serialize()
@@ -164,7 +205,12 @@ class BaseAgent:
         return output
 
     def save(self, records=False):
-        """Return a serializable copy of the agent"""
+        """Return a serializable copy of the agent
+        
+        :param bool records: Whether to include records
+        
+        :return: Dict with all agent attributes
+        """
         output = self.serialize()
         if records:
             output['records'] = self.get_records()
@@ -172,7 +218,18 @@ class BaseAgent:
 
     # ------------- UPDATE ------------- #
     def increment(self, currency, value):
-        """Increment currency in storage as available, return actual receipt"""
+        """Increment currency in storage as available, return actual receipt
+
+        For positive values, add currency to internal storage up to capacity.
+        For negative values, remove currency from internal storage down to 0.
+        For negative values where currency is a currency class, remove 
+        from all currencies in class proportional to their availability.
+        
+        :param str currency: Currency name or (negative value only) currency class
+        :param float value: Amount to add (positive) or remove (negative) from internal storage
+
+        :return: Dict with currency names as keys and actual amount added as values
+        """
         if value == 0:  # If currency_class, return dict of currencies
             available = self.view(currency)
             return {k: 0 for k in available.keys()}
@@ -202,9 +259,16 @@ class BaseAgent:
             return {currency: actual}
         
     def get_flow_value(self, dT, direction, currency, flow, influx):
-        """Update flow state pre-exchange and return target value. 
-        
-        Overloadable by subclasses."""
+        """Return target flow value for a given time step
+
+        :param float dT: Time step
+        :param str direction: 'in' or 'out'
+        :param str currency: Currency or currency class name
+        :param dict flow: Flow dict
+        :param dict influx: Dict of currencies and amounts already consumed this step
+
+        :return: Float with target flow value (per individual)
+\       """
         # Baseline
         step_value = flow['value'] * dT
         # Adjust
@@ -219,7 +283,7 @@ class BaseAgent:
         if step_value > 0 and criteria:
             for i, criterion in enumerate(criteria):
                 buffer_attr = f'{direction}_{currency}_criteria_{i}_buffer'
-                if evaluate_reference(self, criterion):
+                if evaluate_reference(self, **{k: v for k, v in criterion.items() if k != 'buffer'}):
                     if 'buffer' in criterion and self.attributes[buffer_attr] > 0:
                         self.attributes[buffer_attr] -= dT
                         step_value = 0
@@ -250,7 +314,16 @@ class BaseAgent:
         return step_value
     
     def process_flow(self, dT, direction, currency, flow, influx, target, actual):
-        """Update flow state post-exchange. Overloadable by subclasses."""
+        """Update flow state post-exchange. Overloadable by subclasses.
+        
+        :param float dT: Time step
+        :param str direction: 'in' or 'out'
+        :param str currency: Currency or currency class name
+        :param dict flow: Flow dict
+        :param dict influx: Dict of currencies and amounts already consumed this step
+        :param float target: Target flow value, as returned by get_flow_value, multiplied by active
+        :param float actual: Actual flow value, as incremented from connections
+        """
         available_ratio = round(0 if target == 0 else actual/target, 
                                 self.model.floating_point_precision)
         if direction == 'in':
@@ -269,14 +342,20 @@ class BaseAgent:
 
 
     def step(self, dT=1):
-        """Update agent for given timedelta."""
+        """Advance agent state by one step.
+
+        If overloading this method, be sure to check if agent is registered
+        interacting with state.
+        
+        :param float dT: Time step
+        """
         if not self.registered:
             self.register()
         if self.active:
             self.attributes['age'] += dT
             # Check thresholds
             for currency, threshold in self.thresholds.items():
-                if evaluate_reference(self, threshold):
+                if evaluate_reference(self, **threshold):
                     self.kill(f'{self.agent_id} passed {currency} threshold')
 
         # Execute flows
@@ -320,7 +399,11 @@ class BaseAgent:
         self.records['cause_of_death'] = self.cause_of_death
 
     def kill(self, reason, n_dead=None):
-        """Kill n_dead agents, or all if n_dead is None. Overloadable by subclasses."""
+        """Kill n_dead agents, or all if n_dead is None.
+        
+        :param str reason: Cause of death
+        :param int n_dead: Number of agents to kill
+        """
         n_dead = self.active if n_dead is None else n_dead
         self.active = max(0, self.active - n_dead)
         if self.active <= 0:

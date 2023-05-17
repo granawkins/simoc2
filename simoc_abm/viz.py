@@ -4,8 +4,16 @@ from .util import parse_data
 def plot_agent(data, agent, category, exclude=[], include=[], i=None, j=None, ax=None):
     """Helper function for plotting model data
 
-    Plotting function which takes model-exported data, agent name,
-    one of (flows, growth, storage, deprive), exclude, and i:j
+    :param data: Data object returned by `AgentModel.get_records`
+    :param str agent: agent_id of the agent to plot
+    :param str category: category of data to plot ('active', 'flows', 'storage', 'attributes')
+    :param list exclude: list of fields to exclude from the plot
+    :param list include: list of fields to include in the plot (overrides exclude)
+    :param int i: first step to plot (default: 0)
+    :param int j: last step to plot (default: last step)
+    :param ax: matplotlib axes object to plot on (default: plt)
+
+    :returns: matplotlib axes object
     """
     i = i if i is not None else 0
     j = j if j is not None else data['step_num'][-1]

@@ -2,12 +2,18 @@ from collections import defaultdict
 from . import BaseAgent
 
 class AtmosphereEqualizerAgent(BaseAgent):
+    """
+    Maintains a constant ratio of atmospheric currencies between connected agents.
+    
+    :ivar dict atms: Dictionary of atmosphere agents connected to this agent.
+    """
     def __init__(self, *args, **kwargs):
         # -- NON_SERIALIZED
         self.atms = {}
         super().__init__(*args, **kwargs)
 
     def register(self, record_initial_state=True):
+        """Save a reference to all agents in flows.in.atomsphere.connections"""
         self.atms = {a: self.model.agents[a] for a in self.flows['in']['atmosphere']['connections']}
         for agent_id in self.atms.keys():
             for direction in ('in', 'out'):
@@ -17,6 +23,9 @@ class AtmosphereEqualizerAgent(BaseAgent):
         super().register(record_initial_state)
 
     def step(self, dT=1):
+        """Balance atmospheric currencies between all conected agents by volume
+        
+        Bypasses the BaseAgent step method."""
         if not self.registered:
             self.register()
         volumes = {}  # agent_type: m3

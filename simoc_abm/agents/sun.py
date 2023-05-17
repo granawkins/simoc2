@@ -1,6 +1,15 @@
 from . import BaseAgent
 
 class SunAgent(BaseAgent):
+    """A sun which provides light to plants
+
+    :ivar hourly_par_fraction list: The fraction of daily PAR which occurs each our of the day, mean=1
+    :ivar monthly_par list: The mean PAR for each month based on interal readings at Biosphere 2
+
+    Custom Attributes:
+        * **daily_growth_factor** (float) -- Productivity multiplier for hourly PAR
+        * **monthly_growth_factor** (float) -- Productivity multiplier for monthly PAR
+    """
     default_attributes = {
         'daily_growth_factor': 1,
         'monthly_growth_factor': 1,
@@ -35,6 +44,7 @@ class SunAgent(BaseAgent):
         super().__init__(*args, attributes=attributes, capacity=capacity, **kwargs)
 
     def step(self, dT=1):
+        """Calculate and update growth factor attributes"""
         if not self.registered:
             self.register()
         self.storage['par'] = 0

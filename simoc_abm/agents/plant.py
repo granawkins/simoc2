@@ -3,7 +3,20 @@ from . import BaseAgent
 from ..util import recursively_check_required_kwargs
 
 class PlantAgent(BaseAgent):
-    """Plant agent with growth and reproduction."""
+    """Plant agent with growth and reproduction.
+    
+    :ivar list daily_growth: The daily_growth_factor for each hour of the day; mean=1
+    :ivar float max_growth: The maximum kilograms of biomass an individual plant can produce under ideal conditions
+
+    Custom Attributes:
+        * **delay_start** (int): The number of days of simulation before the plant begins growing
+        * **grown** (bool): Whether the plant has reached maturity
+        * **daily_growth_factor** (float): Growth factor for diurnal growth cycle
+        * **par_factor** (float): Growth factor for available:ideal light
+        * **cu_factor** (float): Growth factor for available:ideal carbon dioxide
+        * **te_factor** (float): Growth factor for how carbon dioxide affects transpiration
+        * **growth_rate** (float): The ratio of current to maximum lifetime biomass
+    """
 
     default_attributes = {
         # Lifecycle
@@ -38,6 +51,7 @@ class PlantAgent(BaseAgent):
         self.max_growth = 0
 
     def register(self, record_initial_state=False):
+        """Initialize the daily_growth and max_growth variables"""
         super().register(record_initial_state=record_initial_state)
         # Create the `daily_growth` attribute:
         # - Length is equal to the number of steps per day (e.g. 24)
@@ -69,6 +83,7 @@ class PlantAgent(BaseAgent):
             }
 
     def get_flow_value(self, dT, direction, currency, flow, influx):
+        """Modulate growth and harvest exchanges based on 'grown' attribute"""
         is_grown = self.attributes['grown']
         on_grown = ('criteria' in flow and 
                     any(c['path'] == 'grown' for c in flow['criteria']))
@@ -78,6 +93,12 @@ class PlantAgent(BaseAgent):
         return super().get_flow_value(dT, direction, currency, flow, influx)
         
     def _calculate_co2_response(self):
+        """Calculate the CO2 response attributes based on connected atmosphere
+
+        To avoid intra-step fluctuation, the response of this function is cached
+        each step in the model.
+        
+        :returns: tuple (cu_factor, te_factor): The CO2 uptake and transpiration efficiency factors"""
         if self.model._co2_response_cache['step_num'] != self.model.step_num:
             ref_agent_name = self.flows['in']['co2']['connections'][0]
             ref_agent = self.model.agents[ref_agent_name]
@@ -112,6 +133,7 @@ class PlantAgent(BaseAgent):
         return cached['cu_factor'], cached['te_factor']
     
     def step(self, dT=1):
+        """Calculate and update growth factor attributes."""
         if not self.registered:
             self.register()
         # --- LIFECYCLE ---
@@ -175,7 +197,7 @@ class PlantAgent(BaseAgent):
                                    'age': 0}
 
     def kill(self, reason, n_dead=None):
-        # Convert dead biomass to inedible biomass
+        """Convert dead biomass to inedible biomass when killed."""
         if n_dead is None:
             n_dead = self.active
         dead_biomass = self.view('biomass')['biomass'] * n_dead / self.active
