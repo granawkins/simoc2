@@ -3,17 +3,18 @@ import datetime
 from copy import deepcopy
 
 from ..simoc_abm.util import (load_data_file, 
-                                get_default_agent_data,
-                                get_default_currency_data,
-                                merge_json,
-                                recursively_clear_lists,
-                                evaluate_reference, 
-                                pdf,
-                                sample_norm,
-                                sample_clipped_norm,
-                                sample_sigmoid,
-                                evaluate_growth,
-                                parse_data)
+                              get_default_agent_data,
+                              get_preset_configuration,
+                              get_default_currency_data,
+                              merge_json,
+                              recursively_clear_lists,
+                              evaluate_reference, 
+                              pdf,
+                              sample_norm,
+                              sample_clipped_norm,
+                              sample_sigmoid,
+                              evaluate_growth,
+                              parse_data)
 
 class TestDataFilesHandling:
     def test_load_data_files(self):
@@ -27,6 +28,13 @@ class TestDataFilesHandling:
     def test_get_default_agent_data(self):
         wheat_data = get_default_agent_data('wheat')
         assert all([k in wheat_data for k in ['amount', 'properties', 'flows']])
+
+    def test_get_preset_configuration(self):
+        config = get_preset_configuration('1h')
+        expected_fields = {'agents', 'termination', 'seed', 'location', 'priorities'}
+        assert set(config.keys()) == expected_fields
+        with pytest.raises(ValueError):
+            get_preset_configuration('nonexistent_preset')
     
     def test_get_default_currency_data(self):
         currency_data = get_default_currency_data()

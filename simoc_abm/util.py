@@ -25,6 +25,12 @@ def get_default_agent_data(agent):
         return copy.deepcopy(default_agent_desc[agent])
     return None
 
+def get_preset_configuration(preset):
+    valid_presets = {'1h', '1hg', '1hrad', '4h', '4hg', 'b2_mission1a', 'b2_mission1b', 'b2_mission2'}
+    if preset not in valid_presets:
+        raise ValueError(f'Invalid preset: {preset}')
+    return load_data_file(f'config_{preset}.json')
+    
 def get_default_currency_data():    
     """Load default currency_desc.json and convert to new structure"""
     currencies = {}
