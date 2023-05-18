@@ -21,7 +21,7 @@ class BaseAgent:
     :ivar dict attributes: Dynamic vars, 'te_factor'
     :ivar AgentModel model: AgentModel instance
     :ivar bool registered: Whether agent has been registered
-    :ivar dict records: Agent records    
+    :ivar dict records: Agent records
     """
 
     # ------------- SETUP  ------------- #
@@ -271,6 +271,7 @@ class BaseAgent:
         :param dict influx: Dict of currencies and amounts already consumed this step
 
         :return: Float with target flow value (per individual)
+        
 \       """
         # Baseline
         step_value = flow['value'] * dT
