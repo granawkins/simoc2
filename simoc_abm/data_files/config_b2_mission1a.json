@@ -225,14 +225,11 @@
             "flows": {
                 "in": {
                     "co2": {
-                        "criteria": [
-                            {
-                                "limit": ">",
-                                "value": 0.0025,
-                                "buffer": 8,
-                                "path": "in_co2_ratio"
+                        "criteria": {
+                            "in_co2_ratio": {
+                                "value": 0.0025
                             }
-                        ]
+                        }
                     }
                 }
             }

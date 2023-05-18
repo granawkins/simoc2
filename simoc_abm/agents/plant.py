@@ -86,7 +86,7 @@ class PlantAgent(BaseAgent):
         """Modulate growth and harvest exchanges based on 'grown' attribute"""
         is_grown = self.attributes['grown']
         on_grown = ('criteria' in flow and 
-                    any(c['path'] == 'grown' for c in flow['criteria']))
+                    any(path == 'grown' for path in flow['criteria']))
         if ((is_grown and not on_grown) or 
             (not is_grown and on_grown)):
             return 0.

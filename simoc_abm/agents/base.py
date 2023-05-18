@@ -132,9 +132,9 @@ class BaseAgent:
                 raise ValueError(f'Flow field {field} not allowed')
         # Initialize attributes
         if 'criteria' in flow:
-            for i, criterion in enumerate(flow['criteria']):
+            for path, criterion in flow['criteria'].items():
                 if 'buffer' in criterion:
-                    buffer_attr = f'{direction}_{currency}_criteria_{i}_buffer'
+                    buffer_attr = f'{direction}_{currency}_criteria_{path}_buffer'
                     self.attributes[buffer_attr] = criterion['buffer']
         if 'deprive' in flow:
             deprive_attr = f'{direction}_{currency}_deprive'
@@ -285,9 +285,10 @@ class BaseAgent:
                     step_value *= influx[_currency]  # Scale flows to requires
         criteria = flow.get('criteria')
         if step_value > 0 and criteria:
-            for i, criterion in enumerate(criteria):
-                buffer_attr = f'{direction}_{currency}_criteria_{i}_buffer'
-                if evaluate_reference(self, **{k: v for k, v in criterion.items() if k != 'buffer'}):
+            for path, criterion in criteria.items():
+                buffer_attr = f'{direction}_{currency}_criteria_{path}_buffer'
+                kwargs = {k: v for k, v in criterion.items() if k != 'buffer'}
+                if evaluate_reference(self, path, **kwargs):
                     if 'buffer' in criterion and self.attributes[buffer_attr] > 0:
                         self.attributes[buffer_attr] -= dT
                         step_value = 0

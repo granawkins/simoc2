@@ -44,8 +44,8 @@ def update_desc(agent_type, desc):
                 path = name.split('_')
                 if len(path) == 3:
                     path = [path[-1], *path[:-1]]
-                f['criteria']['path'] = '_'.join(path)
-                f['criteria'] = [f['criteria']]  # Change criteria to list of dicts
+                path = '_'.join(path)
+                f['criteria'] = {path: f['criteria']}
             newDirection = direction[:-3]
             f = {k: v for k, v in f.items() if k != 'required'}  # No longer used
             
@@ -112,20 +112,18 @@ for agent_class, agents in default_agent_desc.items():
 # Manual changes to ECLSS components
 for dir, flows in new_agent_desc['multifiltration_purifier_post_treatment']['flows'].items():
     if dir == 'in':
-        flows['treated']['criteria'] = [{
+        flows['treated']['criteria'] = {'in_treated': {
             "limit": ">=",
             "value": flows['treated']['value'],
-            "path": "in_treated",
-        }]
+        }}
         flows['kwh']['requires'] = ['treated']
 
 for currency, flow in new_agent_desc['co2_reduction_sabatier']['flows']['in'].items():
     if currency == 'h2':
-        flow['criteria'].append({
+        flow['criteria']['in_h2']= {
             "limit": ">=",
             "value": flow['value'],
-            "path": "in_h2",
-        })
+        }
     elif currency == 'co2':
         del flow['criteria']  # Covered by weight
     else:
@@ -135,11 +133,10 @@ new_agent_desc['co2_removal_SAWD']['flows']['out']['co2']['requires'].append('kw
 
 for dir, flows in new_agent_desc['solid_waste_aerobic_bioreactor']['flows'].items():
     if dir == 'in':
-        flows['feces']['criteria'] = [{
+        flows['feces']['criteria'] = {"in_feces": {
             "limit": ">=",
             "value": flows['feces']['value'],
-            "path": "in_feces",
-        }]
+        }}
         o2 = flows.pop('o2')
         flows['kwh']['requires'] = ['feces']
         o2['requires'] = ['feces', 'kwh']
@@ -150,11 +147,10 @@ for dir, flows in new_agent_desc['solid_waste_aerobic_bioreactor']['flows'].item
 
 for dir, flows in new_agent_desc['urine_recycling_processor_VCD']['flows'].items():
     if dir == 'in':
-        flows['urine']['criteria'] = [{
+        flows['urine']['criteria'] = {'in_urine': {
             "limit": ">=",
             "value": flows['urine']['value'],
-            "path": "in_urine",
-        }]
+        }}
         flows['kwh']['requires'] = ['urine']
     if dir == 'out':
         for f in flows.values():
@@ -162,11 +158,10 @@ for dir, flows in new_agent_desc['urine_recycling_processor_VCD']['flows'].items
 
 for dir, flows in new_agent_desc['dehumidifier']['flows'].items():
     if dir == 'in':
-        flows['h2o']['criteria'].append({
+        flows['h2o']['criteria']['in_h2o'] = {
             "limit": ">=",
             "value": flows['h2o']['value'],
-            "path": "in_h2o",
-        })
+        }
     elif dir == 'out':
         flows['treated']['requires'].append('h2o')
 
@@ -247,10 +242,7 @@ for config_name in config_names:
                     food_flow = new_agent_desc['human']['flows']['in']['food']['value']
                     reformatted_agent['flows'] = {'in': {'food': {'value': food_flow / 2}}}
                 elif new_name == 'co2_removal_SAWD':
-                    criteria = new_agent_desc['co2_removal_SAWD']['flows']['in']['co2']['criteria']
-                    criteria[0]['value'] = 0.0025
-                    reformatted_agent['flows'] = {'in': {'co2': {'criteria': criteria}}}
-
+                    reformatted_agent['flows'] = {'in': {'co2': {'criteria': {'in_co2_ratio': {'value': 0.0025}}}}}
             reformatted_config['agents'][new_name] = reformatted_agent
     with open(f'simoc_abm/data_files/config_{config_name}.json', 'w') as f:
         json.dump(reformatted_config, f, indent=4)

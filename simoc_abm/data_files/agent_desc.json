@@ -148,13 +148,12 @@
                     "connections": [
                         "water_storage"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_feces": {
                             "limit": ">=",
-                            "value": 1.5,
-                            "path": "in_feces"
+                            "value": 1.5
                         }
-                    ]
+                    }
                 },
                 "kwh": {
                     "value": 0.678,
@@ -273,13 +272,12 @@
                     "connections": [
                         "water_storage"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_urine": {
                             "limit": ">=",
-                            "value": 2.0,
-                            "path": "in_urine"
+                            "value": 2.0
                         }
-                    ]
+                    }
                 },
                 "kwh": {
                     "value": 1.501,
@@ -352,13 +350,12 @@
                     "connections": [
                         "water_storage"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_treated": {
                             "limit": ">=",
-                            "value": 4.75,
-                            "path": "in_treated"
+                            "value": 4.75
                         }
-                    ]
+                    }
                 },
                 "kwh": {
                     "value": 0.012,
@@ -413,13 +410,12 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "out_o2_ratio": {
                             "limit": "<",
-                            "value": 0.195,
-                            "path": "out_o2_ratio"
+                            "value": 0.195
                         }
-                    ],
+                    },
                     "connections": [
                         "water_storage"
                     ]
@@ -490,19 +486,17 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_co2_ratio": {
                             "limit": ">",
                             "value": 0.001,
-                            "buffer": 2,
-                            "path": "in_co2_ratio"
+                            "buffer": 2
                         },
-                        {
+                        "in_h2": {
                             "limit": ">=",
-                            "value": 0.00163,
-                            "path": "in_h2"
+                            "value": 0.00163
                         }
-                    ],
+                    },
                     "connections": [
                         "habitat"
                     ]
@@ -589,14 +583,13 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_co2_ratio": {
                             "limit": ">",
                             "value": 0.001,
-                            "buffer": 8,
-                            "path": "in_co2_ratio"
+                            "buffer": 8
                         }
-                    ],
+                    },
                     "connections": [
                         "greenhouse",
                         "habitat"
@@ -656,14 +649,13 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "out_co2_ratio": {
                             "limit": "<",
                             "value": 0.0007,
-                            "buffer": 8,
-                            "path": "out_co2_ratio"
+                            "buffer": 8
                         }
-                    ],
+                    },
                     "connections": [
                         "co2_storage"
                     ]
@@ -709,13 +701,12 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_cont_ratio": {
                             "limit": ">",
-                            "value": 0.001,
-                            "path": "in_cont_ratio"
+                            "value": 0.001
                         }
-                    ],
+                    },
                     "connections": [
                         "habitat"
                     ]
@@ -759,18 +750,16 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_h2o_ratio": {
                             "limit": ">",
-                            "value": 0.01,
-                            "path": "in_h2o_ratio"
+                            "value": 0.01
                         },
-                        {
+                        "in_h2o": {
                             "limit": ">=",
-                            "value": 4.0,
-                            "path": "in_h2o"
+                            "value": 4.0
                         }
-                    ],
+                    },
                     "connections": [
                         "greenhouse",
                         "habitat"
@@ -830,14 +819,13 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "in_ch4_ratio": {
                             "limit": ">",
                             "value": 0.01,
-                            "buffer": 6,
-                            "path": "in_ch4_ratio"
+                            "buffer": 6
                         }
-                    ],
+                    },
                     "connections": [
                         "habitat"
                     ]
@@ -871,13 +859,12 @@
                         "unit": "kg",
                         "time": "hour"
                     },
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "out_o2_ratio": {
                             "limit": "<",
-                            "value": 0.2,
-                            "path": "out_o2_ratio"
+                            "value": 0.2
                         }
-                    ],
+                    },
                     "connections": [
                         "o2_storage"
                     ]
@@ -1089,13 +1076,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -1109,13 +1095,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -1302,13 +1287,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -1322,13 +1306,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -1515,13 +1498,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -1535,13 +1517,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -1728,13 +1709,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -1748,13 +1728,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -1941,13 +1920,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -1961,13 +1939,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -2154,13 +2131,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -2174,13 +2150,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -2367,13 +2342,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -2387,13 +2361,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -2580,13 +2553,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -2600,13 +2572,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -2793,13 +2764,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -2813,13 +2783,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -3006,13 +2975,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -3026,13 +2994,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -3219,13 +3186,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -3239,13 +3205,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -3432,13 +3397,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -3452,13 +3416,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -3645,13 +3608,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -3665,13 +3627,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -3858,13 +3819,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -3878,13 +3838,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -4071,13 +4030,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -4091,13 +4049,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -4284,13 +4241,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -4304,13 +4260,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -4497,13 +4452,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -4517,13 +4471,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -4710,13 +4663,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -4730,13 +4682,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -4923,13 +4874,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -4943,13 +4893,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -5136,13 +5085,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -5156,13 +5104,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -5349,13 +5296,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -5369,13 +5315,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -5562,13 +5507,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -5582,13 +5526,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -5775,13 +5718,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -5795,13 +5737,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -5988,13 +5929,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -6008,13 +5948,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -6201,13 +6140,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -6221,13 +6159,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]
@@ -6414,13 +6351,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "food_storage"
                     ]
@@ -6434,13 +6370,12 @@
                     "weighted": [
                         "biomass"
                     ],
-                    "criteria": [
-                        {
+                    "criteria": {
+                        "grown": {
                             "limit": "=",
-                            "value": true,
-                            "path": "grown"
+                            "value": true
                         }
-                    ],
+                    },
                     "connections": [
                         "nutrient_storage"
                     ]

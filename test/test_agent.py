@@ -176,9 +176,9 @@ class TestAgentRegister:
 def flow():
     return {
         'value': 1,
-        'criteria': [{
+        'criteria': {'test_criteria': {
             'buffer': 1,
-        }],
+        }},
         'deprive': {
             'value': 2,
         },
@@ -202,7 +202,7 @@ class TestAgentRegisterFlow:
         test_agent.register(record_initial_state=True)
         
         for attr in [
-            'in_test_currency_criteria_0_buffer',
+            'in_test_currency_criteria_test_criteria_buffer',
             'in_test_currency_deprive',
             'in_test_currency_daily_growth_factor',
             'in_test_currency_lifetime_growth_factor',
@@ -425,15 +425,14 @@ class TestAgentGetFlowValue:
         # TODO: Move some of this to the test for evaluate_criteria.
         test_agent = basic_model.agents['test_agent']
         # Equality | Attribute
-        test_agent.flows['in']['test_currency']['criteria'] = [{
-            'path': 'test_attribute',
+        test_agent.flows['in']['test_currency']['criteria'] = {'test_attribute': {
             'limit': '=',
             'value': 1,
-        }]
+        }}
         get_flow_value_kwargs['flow'] = test_agent.flows['in']['test_currency']
         flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
         assert flow_value == 1
-        test_agent.flows['in']['test_currency']['criteria'][0]['value'] = 2
+        test_agent.flows['in']['test_currency']['criteria']['test_attribute']['value'] = 2
         flow_value = test_agent.get_flow_value(**get_flow_value_kwargs)
         assert flow_value == 0
         
