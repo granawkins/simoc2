@@ -215,12 +215,12 @@ def mock_model_with_currencies(mock_model):
     mock_model.currencies = {
         'test_currency_1': {
             'currency_type': 'currency', 
-            'class': 'test_currency_class'},
+            'category': 'test_currency_category'},
         'test_currency_2': {
             'currency_type': 'currency', 
-            'class': 'test_currency_class'},
-        'test_currency_class': {
-            'currency_type': 'class', 
+            'category': 'test_currency_category'},
+        'test_currency_category': {
+            'currency_type': 'category', 
             'currencies': ['test_currency_1', 'test_currency_2']},
     }
     return mock_model
@@ -232,10 +232,10 @@ class TestAgentView:
         test_agent.register()
         assert test_agent.view('test_currency_1') == {'test_currency_1': 0}
         assert test_agent.view('test_currency_2') == {'test_currency_2': 0}
-        assert test_agent.view('test_currency_class') == {}
+        assert test_agent.view('test_currency_category') == {}
 
     def test_agent_view_full(self, mock_model_with_currencies):
-        """Confirm view returns correct values for currency or currency class"""
+        """Confirm view returns correct values for currency or currency category"""
         test_agent = BaseAgent(
             mock_model_with_currencies, 
             'test_agent',
@@ -244,7 +244,7 @@ class TestAgentView:
         )
         assert test_agent.view('test_currency_1') == {'test_currency_1': 1}
         assert test_agent.view('test_currency_2') == {'test_currency_2': 2}
-        assert test_agent.view('test_currency_class') == {'test_currency_1': 1, 'test_currency_2': 2}
+        assert test_agent.view('test_currency_category') == {'test_currency_1': 1, 'test_currency_2': 2}
 
     def test_agent_view_error(self, mock_model_with_currencies):
         """Confirm that error is raised if view currency not in model"""
@@ -353,9 +353,9 @@ class TestAgentIncrement:
         # Test incrementing a currency without capacity
         with pytest.raises(ValueError):
             test_agent.increment('test_currency_2', 1)
-        # Test incrementing a currency class
+        # Test incrementing a currency category
         with pytest.raises(ValueError):
-            test_agent.increment('test_currency_class', 1)
+            test_agent.increment('test_currency_category', 1)
 
     def test_agent_increment_negative(self, mock_model_with_currencies):
         """Test that increment correctly decrements currencies"""
@@ -369,13 +369,13 @@ class TestAgentIncrement:
         receipt = test_agent.increment('test_currency_1', -1)
         assert receipt == {'test_currency_1': -1}
         assert test_agent.storage['test_currency_1'] == 1
-        # Test decrementing a currency class
-        receipt = test_agent.increment('test_currency_class', -1)
+        # Test decrementing a currency category
+        receipt = test_agent.increment('test_currency_category', -1)
         assert receipt == {'test_currency_1': -0.5, 'test_currency_2': -0.5}
         assert test_agent.storage['test_currency_1'] == 0.5
         assert test_agent.storage['test_currency_2'] == 0.5
-        # Test decrementing a currency class beyond stored
-        receipt = test_agent.increment('test_currency_class', -2)
+        # Test decrementing a currency category beyond stored
+        receipt = test_agent.increment('test_currency_category', -2)
         assert receipt == {'test_currency_1': -0.5, 'test_currency_2': -0.5}
         assert test_agent.storage['test_currency_1'] == 0
         assert test_agent.storage['test_currency_2'] == 0

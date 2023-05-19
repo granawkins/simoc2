@@ -25,7 +25,7 @@ def get_default_agent_data(agent):
         return copy.deepcopy(default_agent_desc[agent])
     return None
 
-def get_preset_configuration(preset):
+def load_preset_configuration(preset):
     valid_presets = {'1h', '1hg', '1hrad', '4h', '4hg', 'b2_mission1a', 'b2_mission1b', 'b2_mission2'}
     if preset not in valid_presets:
         raise ValueError(f'Invalid preset: {preset}')
@@ -35,13 +35,11 @@ def get_default_currency_data():
     """Load default currency_desc.json and convert to new structure"""
     currencies = {}
     currency_desc = load_data_file('currency_desc.json')
-    for currency_class, class_currencies in currency_desc.items():
-        for currency, currency_data in class_currencies.items():
+    for category, cat_currencies in currency_desc.items():
+        for currency, currency_data in cat_currencies.items():
             currencies[currency] = currency_data
             currencies[currency]['currency_type'] = 'currency'
-            currencies[currency]['class'] = currency_class
-        currencies[currency_class] = {'currency_type': 'class',
-                                     'currencies': list(class_currencies.keys())}
+            currencies[currency]['category'] = category
     return currencies
 
 def merge_json(default, to_merge):
@@ -119,7 +117,7 @@ def evaluate_reference(agent, path, limit, value, connections=None):
     elif path.endswith('_ratio'):
         currency = path[:-6]
         currency_data = ref_agent.model.currencies[currency]
-        total = sum(ref_agent.view(currency_data['class']).values())
+        total = sum(ref_agent.view(currency_data['category']).values())
         target = 0 if not total else ref_agent.storage[currency] / total
     # Evaluate
     return operator_dict[limit](

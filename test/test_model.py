@@ -138,10 +138,10 @@ class TestModel:
 
     def test_model_add_currency(self, model_kwargs):
         model = AgentModel(**model_kwargs)
-        model.add_currency('test_currency_id', {})
+        model.add_currency('test_currency_id')
         with pytest.raises(ValueError):
-            model.add_currency('test_currency_id', {})
-        assert model.currencies == {'test_currency_id': {}}
+            model.add_currency('test_currency_id')
+        assert model.currencies == {'test_currency_id': {'currency_type': 'currency'}}
 
     def test_model_register(self, model_kwargs):
         # With record initial state

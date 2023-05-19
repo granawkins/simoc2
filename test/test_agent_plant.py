@@ -24,12 +24,12 @@ def wheat_kwargs():
     return get_default_agent_data('wheat')
 
 @pytest.fixture
-def mock_model():
+def mock_model(default_currency_dict):
     class MockModel:
         floating_point_precision = 6
         agents = {}
         time = datetime.datetime(2020, 1, 1)
-        currencies = get_default_currency_data()
+        currencies = default_currency_dict
         step_num = 0
         def register(self):
             for agent in self.agents.values():

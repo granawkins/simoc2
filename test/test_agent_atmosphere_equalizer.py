@@ -17,11 +17,12 @@ class MockAgent:
 
 class MockModel:
     agents = {}
-    currencies = get_default_currency_data()
+    currencies = None
 
 @pytest.fixture
-def mock_model():
+def mock_model(default_currency_dict):
     model = MockModel()
+    model.currencies = default_currency_dict
     model.agents = {
         'test_agent_1': MockAgent(1, 20, 3, 3),
         'test_agent_2': MockAgent(1, 10, 3, 3),

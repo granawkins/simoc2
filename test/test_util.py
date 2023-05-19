@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from ..simoc_abm.util import (load_data_file, 
                               get_default_agent_data,
-                              get_preset_configuration,
+                              load_preset_configuration,
                               get_default_currency_data,
                               merge_json,
                               recursively_clear_lists,
@@ -29,22 +29,18 @@ class TestDataFilesHandling:
         wheat_data = get_default_agent_data('wheat')
         assert all([k in wheat_data for k in ['amount', 'properties', 'flows']])
 
-    def test_get_preset_configuration(self):
-        config = get_preset_configuration('1h')
+    def test_load_preset_configuration(self):
+        config = load_preset_configuration('1h')
         expected_fields = {'agents', 'termination', 'seed', 'location', 'priorities'}
         assert set(config.keys()) == expected_fields
         with pytest.raises(ValueError):
-            get_preset_configuration('nonexistent_preset')
+            load_preset_configuration('nonexistent_preset')
     
     def test_get_default_currency_data(self):
         currency_data = get_default_currency_data()
         for k, v in currency_data.items():
-            assert 'currency_type' in v
-            if v['currency_type'] == 'class':
-                assert 'currencies' in v
-            else:
-                assert 'class' in v
-                assert v['class'] in currency_data
+            assert 'category' in v
+            assert v['currency_type'] == 'currency'
 
     def test_merge_json(self):
         default = {'a': 'red', 'b': 2, 'c': {'d': 3, 'e': 4}, 'f': [1, 2, 3]}
@@ -91,7 +87,7 @@ class MockAgent:
     def view(self, view):
         if view in ('test_currency_1', 'test_currency_2'):
             return {view: self.storage[view]}
-        elif view == 'test_currency_class':
+        elif view == 'test_currency_category':
             return deepcopy(self.storage)
 
 class MockModel:
@@ -100,14 +96,14 @@ class MockModel:
     currencies = {
         'test_currency_1': {
             'currency_type': 'currency',
-            'class': 'test_currency_class'
+            'category': 'test_currency_category'
         },
         'test_currency_2': {
             'currency_type': 'currency',
-            'class': 'test_currency_class'
+            'category': 'test_currency_category'
         },
-        'test_currency_class': {
-            'currency_type': 'class',
+        'test_currency_category': {
+            'currency_type': 'category',
             'currencies': ['test_currency_1', 'test_currency_2']
         }
     }

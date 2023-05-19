@@ -152,11 +152,11 @@ class BaseAgent:
                 if currency not in self.model.agents[agent].capacity:
                     raise ValueError(f'Agent {agent} does not store {currency}')
             else:
-                class_currencies = self.model.currencies[currency]['currencies']
+                cat_currencies = self.model.currencies[currency]['currencies']
                 if not any(c in self.model.agents[agent].capacity 
-                           for c in class_currencies):
+                           for c in cat_currencies):
                     raise ValueError(f'Agent {agent} does not store any '
-                                     f'currencies of class {currency}')
+                                     f'currencies of category {currency}')
 
     # ------------- INSPECT ------------- #
     def view(self, view):
@@ -171,10 +171,10 @@ class BaseAgent:
             if view not in self.storage:
                 return {view: 0}
             return {view: self.storage[view]}
-        elif currency_type == 'class':
-            class_currencies = self.model.currencies[view]['currencies']
+        elif currency_type == 'category':
+            cat_currencies = self.model.currencies[view]['currencies']
             return {currency: self.storage.get(currency, 0)
-                    for currency in class_currencies
+                    for currency in cat_currencies
                     if currency in self.capacity}
         
     def serialize(self):
@@ -233,10 +233,10 @@ class BaseAgent:
 
         :return: Dict with currency names as keys and actual amount added as values
         """
-        if value == 0:  # If currency_class, return dict of currencies
+        if value == 0:  # If category, return dict of currencies
             available = self.view(currency)
             return {k: 0 for k in available.keys()}
-        elif value < 0:  # Can be currency or currency_class
+        elif value < 0:  # Can be currency or category
             available = self.view(currency)
             total_available = sum(available.values())
             if total_available == 0:
@@ -250,7 +250,7 @@ class BaseAgent:
             return increment
         elif value > 0:  # Can only be currency
             if self.model.currencies[currency]['currency_type'] != 'currency':
-                raise ValueError(f'Cannot increment agent by currency class ({currency})')
+                raise ValueError(f'Cannot increment agent by currency category ({currency})')
             if currency not in self.capacity:
                 raise ValueError(f'Agent does not store {currency}')
             if currency not in self.storage:

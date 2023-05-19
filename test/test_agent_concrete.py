@@ -70,7 +70,7 @@ class MockModel:
         'caoh2': {'currency_type': 'currency'},
         'caco3': {'currency_type': 'currency'},
         'moisture': {'currency_type': 'currency'},
-        'atmosphere': {'currency_type': 'class', 'currencies': ['o2', 'co2']}
+        'atmosphere': {'currency_type': 'category', 'currencies': ['o2', 'co2']}
     }
 
 @pytest.fixture

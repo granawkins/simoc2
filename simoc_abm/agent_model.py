@@ -20,7 +20,7 @@ class AgentModel:
     initialization, persistence and monitoring.
     
     :ivar dict agents: A dictionary of agents in the simulation.
-    :ivar dict currencies: A dictionary of currencies and currency classes used in the simulation.
+    :ivar dict currencies: A dictionary of currencies and currency categories used in the simulation.
     :ivar str location: The location of the simulation.
     :ivar datetime start_time: The start time of the simulation.
     :ivar timedelta elapsed_time: The elapsed time of the simulation.
@@ -76,15 +76,33 @@ class AgentModel:
         self.registered = False
         self.records = {'time': [], 'step_num': []}
 
-    def add_currency(self, currency_id, currency_data):
+    def add_currency(self, currency_id, unit=None, label=None, short=None,
+                     category=None, description=None, **kwargs):
         """Add a currency to the model.
         
         :param str currency_id: The name of the currency.
-        :param dict currency_data: The currency data.
+        :param str unit: The unit of the currency, e.g. 'kg'
+        :param str label: The label of the currency, e.g. 'Oxygen'
+        :param str short: The short name of the currency, e.g. 'O2'
+        :param str category: The category of the currency, e.g. 'atmosphere'
+        :param str description: A description of the currency.
         """
         if currency_id in self.currencies:
-            raise ValueError(f'Currency and currency class names must be unique ({currency_id})')
-        self.currencies[currency_id] = currency_data
+            raise ValueError(f'Currency names must be unique ({currency_id})')
+        record = {'currency_type': 'currency',
+                  'unit': unit,
+                  'label': label,
+                  'short': short,
+                  'category': category,
+                  'description': description,
+                  **kwargs}
+        self.currencies[currency_id] = {k: v for k, v in record.items() if v is not None}
+        if category is not None:
+            category = category.lower()
+            if category in self.currencies:
+                self.currencies[category]['currencies'].append(currency_id)
+            else:
+                self.currencies[category] = {'currencies': [currency_id], 'currency_type': 'category'}
 
     def add_agent(self, agent_id, agent):
         """Add an agent to the model.
@@ -200,11 +218,9 @@ class AgentModel:
         # Merge user currencies with default currencies
         currencies = {**get_default_currency_data(), **currencies}
         for currency_id, currency_data in currencies.items():
-            # Only add currencies and currency classes with active flows
-            if (currency_id in currencies_in_use or 
-                (currency_data.get('currency_type') == 'class' and 
-                any(c in currencies_in_use for c in currency_data['currencies']))):
-                model.add_currency(currency_id, currency_data)
+            # Only add currencies with active flows
+            if currency_id in currencies_in_use:
+                model.add_currency(currency_id, **currency_data)
 
         if record_initial_state is None:
             record_initial_state = model.step_num == 0
