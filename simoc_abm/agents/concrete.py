@@ -80,6 +80,8 @@ class ConcreteAgent(BaseAgent):
 
     def step(self, dT=1):
         """Update carbonation rate and carbonation, which will be used to weight flows"""
+        if not self.registered:
+            self.register()
         # Calculate ppm of CO2 in atmosphere
         ref_agent_name = self.flows['in']['co2']['connections'][0]
         ref_agent = self.model.agents[ref_agent_name]

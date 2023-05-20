@@ -26,6 +26,23 @@ def get_default_agent_data(agent):
     return None
 
 def load_preset_configuration(preset):
+    """Load a preset configuration from the SIMOC-ABM library.
+    
+    Presets contain all the necessary agents to run a successful simulation. 
+    Available presets:
+      * 1h: 1 human
+      * 1hrad: 1 human and 40 square meters of radishes
+      * 4h: 4 humans
+      * 4hg: 4 humans and 210 square meters of various plants
+      * 1hg_sam: 1 human and 23 square meers of various plants in the SAM habitat (see samb2.space)
+      * b2_mission1a: The first half of the historical Biosphere 2 Mission 1
+      * b2_mission1b: The second half of the historical Biosphere 2 Mission 1
+      * b2_mission2: The historical Biosphere 2 Mission 2
+
+    :param str preset: Name of preset configuration to load
+
+    :return: (dict) Multi-level dictionary matching the keyword-arguments of the ``AgentModel.from_config`` method
+    """
     valid_presets = {'1h', '1hg', '1hrad', '4h', '4hg', 'b2_mission1a', 'b2_mission1b', 'b2_mission2'}
     if preset not in valid_presets:
         raise ValueError(f'Invalid preset: {preset}')
@@ -118,7 +135,7 @@ def evaluate_reference(agent, path, limit, value, connections=None):
         currency = path[:-6]
         currency_data = ref_agent.model.currencies[currency]
         total = sum(ref_agent.view(currency_data['category']).values())
-        target = 0 if not total else ref_agent.storage[currency] / total
+        target = 0 if not total else ref_agent.view(currency)[currency] / total
     # Evaluate
     return operator_dict[limit](
         round(target, agent.model.floating_point_precision),

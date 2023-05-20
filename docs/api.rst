@@ -29,6 +29,8 @@ Agent Classes
 
 Utilities
 =========
+.. autofunction:: simoc_abm.util.load_preset_configuration
+
 .. autofunction:: simoc_abm.util.recursively_check_required_kwargs
 
 .. autofunction:: simoc_abm.util.evaluate_reference
