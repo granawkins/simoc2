@@ -30,14 +30,14 @@ def load_preset_configuration(preset):
     
     Presets contain all the necessary agents to run a successful simulation. 
     Available presets:
-      * 1h: 1 human
-      * 1hrad: 1 human and 40 square meters of radishes
-      * 4h: 4 humans
-      * 4hg: 4 humans and 210 square meters of various plants
-      * 1hg_sam: 1 human and 23 square meers of various plants in the SAM habitat (see samb2.space)
-      * b2_mission1a: The first half of the historical Biosphere 2 Mission 1
-      * b2_mission1b: The second half of the historical Biosphere 2 Mission 1
-      * b2_mission2: The historical Biosphere 2 Mission 2
+    * 1h: 1 human
+    * 1hrad: 1 human and 40 square meters of radishes
+    * 4h: 4 humans
+    * 4hg: 4 humans and 210 square meters of various plants
+    * 1hg_sam: 1 human and 23 square meers of various plants in the SAM habitat (see samb2.space)
+    * b2_mission1a: The first half of the historical Biosphere 2 Mission 1
+    * b2_mission1b: The second half of the historical Biosphere 2 Mission 1
+    * b2_mission2: The historical Biosphere 2 Mission 2
 
     :param str preset: Name of preset configuration to load
 
