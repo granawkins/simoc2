@@ -19,7 +19,8 @@ of initializing an AgentModel:
 
 .. code-block:: python
 
-    from simoc_abm import AgentModel, load_preset_config
+    from simoc_abm.agent_model import AgentModel
+    from simoc_abm.util load_preset_config
 
     # Load Configuration file
     config = load_preset_config('1h')
@@ -34,7 +35,8 @@ of initializing an AgentModel:
 
 .. code-block:: python
 
-    from simoc_abm import AgentModel, BaseAgent
+    from simoc_abm.agent_model import AgentModel
+    from simoc_abm.agents import BaseAgent
 
     # Initialize Agents
     habitat = BaseAgent(model, 'habitat', capacity={'o2': 1000}, storage={'o2': 1000})
@@ -55,7 +57,7 @@ helper functions for parsing and visualizing records.
 
 .. code-block:: python
 
-    from simoc_abm import plot_agent
+    from simoc_abm.viz import plot_agent
 
     # Extract Records
     records = model.get_records()

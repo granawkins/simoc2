@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from simoc_abm.util import load_data_file, get_default_currency_data
+from src.simoc_abm.util import load_data_file, get_default_currency_data
 
 # -----------------
 # UPDATE AGENT DESC
@@ -168,7 +168,7 @@ for dir, flows in new_agent_desc['dehumidifier']['flows'].items():
 
 
 # SAVE NEW DATA FILES
-with open('simoc_abm/data_files/agent_desc.json', 'w') as f:
+with open('src/simoc_abm/data_files/agent_desc.json', 'w') as f:
     json.dump(new_agent_desc, f, indent=4)
 
 # ---------------------
@@ -244,5 +244,5 @@ for config_name in config_names:
                 elif new_name == 'co2_removal_SAWD':
                     reformatted_agent['flows'] = {'in': {'co2': {'criteria': {'in_co2_ratio': {'value': 0.0025}}}}}
             reformatted_config['agents'][new_name] = reformatted_agent
-    with open(f'simoc_abm/data_files/config_{config_name}.json', 'w') as f:
+    with open(f'src/simoc_abm/data_files/config_{config_name}.json', 'w') as f:
         json.dump(reformatted_config, f, indent=4)

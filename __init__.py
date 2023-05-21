@@ -1,1 +1,0 @@
-name = 'simoc_lite'
