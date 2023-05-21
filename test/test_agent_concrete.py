@@ -1,6 +1,6 @@
 from copy import deepcopy
 import pytest
-from ..simoc_abm.agents import BaseAgent, ConcreteAgent
+from simoc_abm.agents import BaseAgent, ConcreteAgent
 
 @pytest.fixture
 def minimum_kwargs():

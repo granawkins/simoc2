@@ -1,0 +1,22 @@
+[project]
+name = "simoc_abm"
+version = "0.9"
+authors = [
+    { name="Grant Hawkins", email="granthawkins88@gmail.com" },
+]
+description = "Agent Based Modelling for Ecosystems"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/overthesun/simoc-abm"
+"Bug Tracker" = "https://github.com/overthesun/simoc-abm/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

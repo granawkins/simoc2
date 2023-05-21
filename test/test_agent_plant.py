@@ -2,8 +2,8 @@ import copy
 import datetime
 import pytest
 import numpy as np
-from ..simoc_abm.agents import PlantAgent, BaseAgent
-from ..simoc_abm.util import get_default_currency_data, get_default_agent_data
+from simoc_abm.agents import PlantAgent, BaseAgent
+from simoc_abm.util import get_default_currency_data, get_default_agent_data
 
 @pytest.fixture
 def basic_kwargs():

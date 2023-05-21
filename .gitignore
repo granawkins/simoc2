@@ -3,3 +3,5 @@
 test/v1_simdata/simoc-simdata*
 
 docs/_build/*
+
+dist/

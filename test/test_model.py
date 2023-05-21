@@ -6,13 +6,13 @@ from unittest.mock import Mock
 import pytest
 import numpy as np
 
-from ..simoc_abm.agent_model import (DEFAULT_START_TIME,
+from simoc_abm.agent_model import (DEFAULT_START_TIME,
                                  DEFAULT_LOCATION,
                                  DEFAULT_PRIORITIES,
                                  AgentModel, 
                                  Scheduler)
-from ..simoc_abm.agents import BaseAgent
-from ..simoc_abm.util import get_default_agent_data
+from simoc_abm.agents import BaseAgent
+from simoc_abm.util import get_default_agent_data
 
 class MockModel:
     def __init__(self, seed=1000):

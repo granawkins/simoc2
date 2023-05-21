@@ -2,8 +2,8 @@ import gzip, json
 import urllib.request
 from pathlib import Path
 import pytest
-from ..simoc_abm.agent_model import AgentModel
-from ..simoc_abm.util import load_data_file
+from simoc_abm.agent_model import AgentModel
+from simoc_abm.util import load_data_file
 
 config_mapping = {
     '1h': 'simoc-simdata-1-human-preset.json.gz',

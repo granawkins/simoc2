@@ -1,5 +1,5 @@
 import datetime
-from ..simoc_abm.agents import SunAgent
+from simoc_abm.agents import SunAgent
 
 class MockModel:
     time = datetime.datetime(1900, 1, 1, 0)

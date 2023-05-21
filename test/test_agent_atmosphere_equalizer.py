@@ -1,6 +1,6 @@
 import pytest
-from ..simoc_abm.agents import AtmosphereEqualizerAgent
-from ..simoc_abm.util import get_default_currency_data
+from simoc_abm.agents import AtmosphereEqualizerAgent
+from simoc_abm.util import get_default_currency_data
 
 class MockAgent:
     def __init__(self, amount, volume, o2, co2):
