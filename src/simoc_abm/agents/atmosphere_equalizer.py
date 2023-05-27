@@ -28,6 +28,9 @@ class AtmosphereEqualizerAgent(BaseAgent):
         Bypasses the BaseAgent step method."""
         if not self.registered:
             self.register()
+        if self.active:
+            self.attributes['age'] += dT
+
         volumes = {}  # agent_type: m3
         current = {}  # agent_type: {atmo_currency: kg}
         total_atm = defaultdict(float)  # atmo_currency: kg
@@ -36,6 +39,7 @@ class AtmosphereEqualizerAgent(BaseAgent):
             current[agent_id] = agent.view(view='atmosphere')
             for currency, amount in current[agent_id].items():
                 total_atm[currency] += amount
+        total_atm = dict(total_atm)
 
         total_volume = sum(volumes.values())
         for agent_id, agent in self.atms.items():
@@ -50,4 +54,8 @@ class AtmosphereEqualizerAgent(BaseAgent):
                 outflow = abs(min(0, delta))
                 self.records['flows']['in'][currency][agent_id].append(inflow)
                 self.records['flows']['out'][currency][agent_id].append(outflow)
+
+        self.records['active'].append(self.active)
+        for attribute in self.attributes:
+            self.records['attributes'][attribute].append(self.attributes[attribute])
                 

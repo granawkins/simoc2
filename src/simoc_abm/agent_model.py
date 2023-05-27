@@ -87,6 +87,8 @@ class AgentModel:
         :param str category: The category of the currency, e.g. 'atmosphere'
         :param str description: A description of the currency.
         """
+        if kwargs.get('currency_type', None) == 'category':
+            return  # Classes added programatically, but exported (and re-imported)
         if currency_id in self.currencies:
             raise ValueError(f'Currency names must be unique ({currency_id})')
         record = {'currency_type': 'currency',
