@@ -1,6 +1,6 @@
 [project]
 name = "simoc_abm"
-version = "0.9"
+version = "1.0"
 authors = [
     { name="Grant Hawkins", email="granthawkins88@gmail.com" },
 ]
