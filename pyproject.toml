@@ -16,6 +16,7 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/overthesun/simoc-abm"
 "Bug Tracker" = "https://github.com/overthesun/simoc-abm/issues"
+"Documentation" = "https://simoc-abm.readthedocs.org"
 
 [build-system]
 requires = ["hatchling"]
