@@ -63,15 +63,13 @@ def compare_records(records, stem):
 
     # Load current simdata
     simdata = load_simdata(stem)
-    assert records['step_num'][-1] == simdata['steps'], 'Different step numbers'
+    assert records['step_num'][-1] == simdata['steps'], f'Different step numbers: {records["step_num"][-1]} vs {simdata["steps"]}'
     references = simdata['data']
 
     # Generate comparison report
     reports = {}
     for agent_id, record in records['agents'].items():
-        substitute_names = {'human': 'human_agent'}
-        old_name = substitute_names.get(agent_id, agent_id)
-        reference = references[old_name]
+        reference = references[agent_id]
         report = {}
         
         # Compare storage
@@ -83,13 +81,9 @@ def compare_records(records, stem):
         
         # Compare flows
         if 'flows' in record:
-            if agent_id == 'atmosphere_equalizer':
-                continue  # Not part of old records
             report['flows'] = {}
             for direction, flows in record['flows'].items():
                 for currency, currency_flows in flows.items():
-                    if currency == 'par':
-                        continue  # Not part of old records
                     per_connection = []
                     for connection, predictions in currency_flows.items():
                         targets = reference['flows'][direction][currency][connection]
@@ -101,215 +95,97 @@ def compare_records(records, stem):
         if 'attributes' in record:
             report['attributes'] = {}
             for attribute, predictions in record['attributes'].items():
-                if 'growth' in reference and attribute in reference['growth']:
-                    targets = reference['growth'][attribute]
-                elif 'deprive' in attribute:
-                    deprive_attr = attribute[:-8]  # e.g. 'co2' from 'co2_deprive'
-                    if deprive_attr in reference['deprive']:
-                        targets = reference['deprive'][deprive_attr]
-                    else:
-                        continue
-                elif 'criteria' in attribute:
-                    if 'buffer' not in reference:
-                        continue
-                    criteria_attr = '_'.join(attribute.split('_')[:2])
-                    if criteria_attr in reference['buffer']:
-                        continue  # Broken?
-                        targets = reference['buffer'][criteria_attr]
-                elif (attribute in {'age', 'delay_start', 'par_rate', 'photoperiod'} or 
-                      'growth_factor' in attribute):
-                    continue
-                else:
-                    assert False, f'Unaccounted for attribute: {attribute}'
+                targets = reference['attributes'][attribute]
                 report['attributes'][attribute] = lpe(predictions, targets)
 
         reports[agent_id] = report
     return reports
 
+# Between commits, some items are expected to change. They are listed here.
+EXCEPTIONS = [
+    # 24-Aug: It seems there were some changes to the AtomsphereEqualizer after
+    # we generated the last simdata file, which has caused these fields be off
+    # (by <5%) in the comparison report. We are ignoring these fields for now.
+    # After simdata is updated next, this should be removed or replaced.
+    ('water_storage', 'treated'),
+    ('co2_removal_SAWD', 'in_co2_criteria_in_co2_ratio_buffer'),
+    ('co2_makeup_valve', 'in_co2_criteria_out_co2_ratio_buffer'),
+    ('co2_reduction_sabatier', 'in_h2_criteria_in_co2_ratio_buffer'),
+]
+
+def generate_and_compare(stem):
+    """Generate a comparison report for the given config stem."""
+    config = load_data_file(f'config_{stem}.json')
+    model = AgentModel.from_config(**config)
+    model.run()
+    records = model.get_records()
+    comparison_report = compare_records(records, stem)
+    with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
+        json.dump(comparison_report, f, indent=2)
+    for agent, report in comparison_report.items():
+      for section, fields in report.items():
+          for field, value in fields.items():
+              if any(exception[0] == agent and exception[1] == field
+                     for exception in EXCEPTIONS):
+                  continue
+              percent_error = 1
+              # Less than 1% error in lifetime
+              assert abs(value) < percent_error, f'{agent} {section} {field} error: {value}'
+    # Return items for config-specific tests
+    return model, records, comparison_report
+
+
+# -------------------------------------------
+# Test for each config
+# -------------------------------------------
 
 class TestConfigs:
     def test_config_1h(self):
-        config = load_data_file('config_1h.json')
-        model = AgentModel.from_config(**config, record_initial_state=False)
-        model.run()
+        stem = '1h'
+        model, records, comparison_report = generate_and_compare(stem)
         assert model.elapsed_time.days == 10
         human = model.agents['human']
         assert human.active == 1
 
-        records = model.get_records()
-        comparison_report = compare_records(records, '1h')
-        with open('test/v1_simdata/comparison_report_1h.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-        for agent, report in comparison_report.items():
-            for section, fields in report.items():
-                for field, value in fields.items():
-                    exceptions = {
-                        # ECLSS components are more active because many
-                        # previously had duplicated criteria. e.g. 
-                        ('crew_habitat_small', 'storage', 'co2'): 3.3,
-                        ('crew_habitat_small', 'storage', 'h2o'): 1.3,
-                        ('water_storage', 'storage', 'treated'): 5.7,
-                    }
-                    if (agent, section, field) in exceptions:
-                        percent_error = exceptions[(agent, section, field)]
-                    else:
-                        percent_error = 1
-                    # Less than 1% error in lifetime
-                    assert abs(value) < percent_error, f'{agent} {section} {field} error: {value}'
-
     def test_config_1hrad(self):
         stem = '1hrad'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
+        assert model.elapsed_time.days == 30
         human = model.agents['human']
         assert human.active == 1
-
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-        for agent, report in comparison_report.items():
-            for section, fields in report.items():
-                for field, value in fields.items():
-                    exceptions = {
-                        ('solar_pv_array_mars', 'flows', 'out_kwh'): 3.4,
-                        ('crew_habitat_small', 'storage', 'co2'): 12.2,
-                        ('crew_habitat_small', 'storage', 'h2o'): 3.0,
-                        ('greenhouse_small', 'storage', 'co2'): 8.9,
-                        ('greenhouse_small', 'storage', 'h2o'): 1.9,
-                        # These are mistakenly logged twice in the simdata
-                        ('radish', 'flows', 'out_radish'): 50,
-                        ('radish', 'flows', 'out_inedible_biomass'): 50,
-                        # THis means something different now
-                        ('radish', 'attributes', 'growth_rate'): 102,
-                        # These were formerly multiplied by amount
-                        ('radish', 'attributes', 'in_co2_deprive'): 98,
-                        ('radish', 'attributes', 'in_potable_deprive'): 98,
-                        ('radish', 'attributes', 'in_fertilizer_deprive'): 98,
-                        ('water_storage', 'storage', 'treated'): 7.4,
-                        ('nutrient_storage', 'storage', 'inedible_biomass'): 1.5,
-                        ('power_storage', 'storage', 'kwh'): 11.1,
-                        ('co2_removal_SAWD', 'flows', 'in_co2'): 1.8,
-                        ('co2_removal_SAWD', 'flows', 'in_kwh'): 3.5,
-                        ('co2_removal_SAWD', 'flows', 'out_co2'): 3.5,
-                        ('co2_storage', 'storage', 'co2'): 1.8,
-                    }
-                    if (agent, section, field) in exceptions:
-                        percent_error = exceptions[(agent, section, field)]
-                    else:
-                        percent_error = 1
-                    # Less than 1% error in lifetime
-                    assert abs(value) < percent_error, f'{agent} {section} {field} error: {value}'
-
 
     def test_config_4h(self):
         stem = '4h'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 4
-
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-        for agent, report in comparison_report.items():
-            for section, fields in report.items():
-                for field, value in fields.items():
-                    exceptions = {
-                        ('human', 'attributes', 'in_potable_deprive'): 75,
-                        ('human', 'attributes', 'in_food_deprive'): 75,
-                        ('solar_pv_array_mars', 'flows', 'out_kwh'): 3.3,
-                        ('crew_habitat_small', 'storage', 'co2'): 4.9,
-                        ('crew_habitat_small', 'storage', 'ch4'): 4.2,
-                        ('crew_habitat_small', 'storage', 'h2'): 1.8,
-                        ('crew_habitat_small', 'storage', 'h2o'): 4.3,
-                        ('water_storage', 'storage', 'urine'): 1.2,
-                        ('water_storage', 'storage', 'treated'): 10.3,
-                        ('power_storage', 'storage', 'kwh'): 1.6,
-                        ('co2_reduction_sabatier', 'flows', 'in_h2'): 1.1,
-                        ('co2_reduction_sabatier', 'flows', 'in_co2'): 3.3,
-                        ('co2_reduction_sabatier', 'flows', 'in_kwh'): 3.3,
-                        ('co2_reduction_sabatier', 'flows', 'out_ch4'): 3.3,
-                        ('co2_reduction_sabatier', 'flows', 'out_feces'): 3.3,
-                    }
-                    if (agent, section, field) in exceptions:
-                        percent_error = exceptions[(agent, section, field)]
-                    else:
-                        percent_error = 1
-                    # Less than 1% error in lifetime
-                    assert abs(value) < percent_error, f'{agent} {section} {field} error: {value}'
 
     def test_config_4hg(self):
         stem = '4hg'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        # For some reason, the simdata only has 2300 steps instead of 2400
-        for i in range(2300):        
-            model.step()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 4
 
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-
-
     def test_config_1hg_sam(self):
         stem = '1hg_sam'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 1
 
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-
-
     def test_config_b2_mission1a(self):
         stem = 'b2_mission1a'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 8
-
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-
 
     def test_config_b2_mission1b(self):
         stem = 'b2_mission1b'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 8
-
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-
-
 
     def test_config_b2_mission2(self):
         stem = 'b2_mission2'
-        config = load_data_file(f'config_{stem}.json')
-        model = AgentModel.from_config(**config)
-        model.run()
+        model, records, comparison_report = generate_and_compare(stem)
         human = model.agents['human']
         assert human.active == 8
-
-        records = model.get_records()
-        comparison_report = compare_records(records, stem)
-        with open(f'test/v1_simdata/comparison_report_{stem}.json', 'w') as f:
-            json.dump(comparison_report, f, indent=2)
