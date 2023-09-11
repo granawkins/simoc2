@@ -11,7 +11,7 @@
             "unit": "kg"
         },
         "h2": {
-            "label": "Hydrogen",
+            "label": "Free Hydrogen",
             "short": "H₂",
             "unit": "kg"
         },
@@ -34,7 +34,6 @@
     "nutrients": {
         "fertilizer": {
             "label": "N-P-K Fertilizer",
-            "short": "Fertilizer",
             "unit": "kg"
         },
         "waste": {
@@ -43,7 +42,6 @@
         },
         "biomass": {
             "label": "Accumulated Biomass",
-            "short": "Biomass",
             "unit": "kg"
         },
         "inedible_biomass": {
@@ -415,7 +413,7 @@
             "unit": "kg"
         },
         "feces": {
-            "label": "Waste",
+            "label": "Feces",
             "unit": "kg"
         }
     },
