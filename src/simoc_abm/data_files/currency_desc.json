@@ -37,7 +37,7 @@
             "unit": "kg"
         },
         "waste": {
-            "label": "Waste",
+            "label": "Urine Salts",
             "unit": "kg"
         },
         "biomass": {
@@ -419,8 +419,7 @@
     },
     "energy": {
         "kwh": {
-            "label": "Kilowatt-Hours",
-            "short": "kWh",
+            "label": "Energy",
             "unit": "kWh"
         },
         "par": {
